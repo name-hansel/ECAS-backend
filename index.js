@@ -18,10 +18,12 @@ const PORT = process.env.PORT || 5000;
 const connectToDatabase = require("./config/database")
 connectToDatabase();
 
+const commonAuthRouter = require("./routes/auth")
 const adminRouter = require("./routes/admin")
 
 // Routes
 app.use("/api/admin", adminRouter);
+app.get("/api/auth", commonAuthRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)

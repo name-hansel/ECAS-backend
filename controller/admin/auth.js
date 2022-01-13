@@ -45,7 +45,7 @@ router.post("/login", async (req, res) => {
     // Set cookie
     res.cookie("access-token", accessToken, options);
     res.status(200).json({
-      accessToken
+      message: "Logged in successfully!"
     })
   } catch (err) {
     console.error(err.message);
