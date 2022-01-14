@@ -8,7 +8,7 @@ const Setting = require("../../models/Setting")
 
 const { adminAuthMiddleware } = require("../../utils/authMiddleware")
 
-// @route   POST /auth/login
+// @route   POST /api/admin/auth/login
 // @desc    Login as admin
 // @access  Public
 router.post("/login", async (req, res) => {
@@ -55,7 +55,7 @@ router.post("/login", async (req, res) => {
   }
 })
 
-// @route   POST /auth/change-password
+// @route   POST /api/admin/auth/change-password
 // @desc    Change admin password
 // @access  Public
 router.post("/change-password", adminAuthMiddleware, async (req, res) => {
