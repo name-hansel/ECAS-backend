@@ -5,7 +5,7 @@ const adminAuthMiddleware = (req, res, next) => {
     // Check cookie
     if (!req.cookies['access-token'])
       return res.status(401).json({
-        error: "Please log in to see this page"
+        error: "Please log in"
       })
 
     const accessToken = req.cookies['access-token']
@@ -18,8 +18,8 @@ const adminAuthMiddleware = (req, res, next) => {
 
   } catch (err) {
     console.error(err.message)
-    return res.status(401).json({
-      error: "Please log in to see this page"
+    return res.status(500).json({
+      error: "Server error"
     })
   }
   next();
