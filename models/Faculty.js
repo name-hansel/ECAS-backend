@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const ExamCellSchema = new mongoose.Schema({
+const FacultySchema = new mongoose.Schema({
   employeeId: {
     type: String,
     required: true,
@@ -23,10 +23,23 @@ const ExamCellSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true
-  }, phoneNumber: {
-    type: String, trim: true
-  }
+  }, dateOfJoining: {
+    type: Date
+  }, department: {
+    type: String,
+    required: true,
+    trim: true
+  }, assignedCourses: [{
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true
+    }, division: {
+      type: String,
+      required: true,
+      trim: true,
+    }
+  }]
 }, { timestamps: true })
 
-// TODO add date of joining
-module.exports = mongoose.model("ExamCell", ExamCellSchema)
+module.exports = mongoose.model("Faculty", FacultySchema)
