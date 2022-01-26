@@ -61,7 +61,6 @@ router.post("/logout", (req, res) => {
 // @route   GET /api/auth/google/:role
 // @desc    Handle Google OAuth redirect, set cookie, and return user
 // @access  Public
-// TODO add avatar to models
 router.get("/google/:role", async (req, res) => {
   try {
     // Get role
