@@ -16,12 +16,13 @@ const CourseSchema = new mongoose.Schema({
   }, semester: {
     type: Number,
     required: true
+  }, credits: {
+    type: Number,
+    required: true
   }, examTypes: [{
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    trim: true
   }]
 }, { timestamps: true })
 
-// ? Credits?
 module.exports = mongoose.model("Course", CourseSchema)

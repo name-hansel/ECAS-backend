@@ -21,9 +21,6 @@ const StudentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Branch",
     required: true
-  }, dateOfBirth: {
-    type: Date,
-    required: true
   }, currentSemester: {
     type: Number,
     required: true

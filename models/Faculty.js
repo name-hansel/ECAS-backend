@@ -6,11 +6,6 @@ const FacultySchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true
-  }, salutation: {
-    type: String,
-    required: true,
-    enum: ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."],
-    trim: true
   }, firstName: {
     type: String,
     trim: true
@@ -23,8 +18,6 @@ const FacultySchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true
-  }, dateOfJoining: {
-    type: Date
   }, department: {
     type: String,
     required: true,
@@ -34,10 +27,14 @@ const FacultySchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: true
-    }, division: {
+    }, class: { // "SEM6 - A"
       type: String,
       required: true,
       trim: true,
+    }, academicSession: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "AcademicSession"
     }
   }]
 }, { timestamps: true })

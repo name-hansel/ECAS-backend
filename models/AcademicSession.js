@@ -12,6 +12,10 @@ const AcademicSessionSchema = new mongoose.Schema({
     required: true,
     trim: true,
     enum: ["EVEN", "ODD"]
+  }, current: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 }, { timestamps: true })
 

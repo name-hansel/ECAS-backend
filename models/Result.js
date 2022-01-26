@@ -26,12 +26,9 @@ const ResultSchema = new mongoose.Schema({
     trim: true
   }, results: [{
     examType: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
-      trim: true
-    }, totalMarks: {
-      type: Number,
-      required: true
+      ref: "ExamType"
     }, marksObtained: {
       type: Number,
       required: true

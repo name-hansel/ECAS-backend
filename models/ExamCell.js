@@ -6,11 +6,6 @@ const ExamCellSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true
-  }, salutation: {
-    type: String,
-    required: true,
-    enum: ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."],
-    trim: true
   }, firstName: {
     type: String,
     trim: true
@@ -28,5 +23,4 @@ const ExamCellSchema = new mongoose.Schema({
   }
 }, { timestamps: true })
 
-// TODO add date of joining
 module.exports = mongoose.model("ExamCell", ExamCellSchema)
