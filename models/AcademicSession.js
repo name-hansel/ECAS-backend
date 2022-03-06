@@ -16,6 +16,10 @@ const AcademicSessionSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
     default: false
+  }, archived: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 }, { timestamps: true })
 

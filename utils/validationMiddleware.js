@@ -1,6 +1,13 @@
 const { body, validationResult, param } = require('express-validator');
 const { isValidObjectId } = require("mongoose")
 
+const sendErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(400).json({ error: errors.array() });
+  next();
+}
+
 exports.idValidator = [
   param("_id").custom(value => {
     // Custom validator to check if id is a valid object id
@@ -8,25 +15,19 @@ exports.idValidator = [
       throw new Error("ID is not valid")
     }
     return true
-  }), (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
-    }
-    next();
-  }
+  }), sendErrors
 ]
 
 exports.examCellValidator = [
-  body('employeeId', 'Employee Id is required')
+  body('employeeId')
     .notEmpty().withMessage("Employee ID is required")
     .bail()
     .trim()
     .isString().withMessage("Employee ID is invalid"),
-  body('firstName', "First name is required")
+  body('firstName')
+    .notEmpty().withMessage("First name is required")
     .bail()
     .trim()
-    .notEmpty().withMessage("First name is required")
     .isString().withMessage("First name is invalid"),
   body('lastName')
     .notEmpty().withMessage("Last name is required")
@@ -44,11 +45,34 @@ exports.examCellValidator = [
     .bail()
     .trim()
     .isString().withMessage("Phone number is invalid")
-    .isMobilePhone("en-IN").withMessage("Phone number is invalid"),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ error: errors.array() });
-    next();
-  }
+    .isMobilePhone("en-IN").withMessage("Phone number is invalid"), sendErrors
+]
+
+exports.academicSessionValidator = [
+  body('from')
+    .notEmpty().withMessage("From year is required")
+    .bail()
+    .isNumeric().withMessage("From year is invalid"),
+  body('to')
+    .notEmpty().withMessage("To year is required")
+    .bail()
+    .isNumeric().withMessage("To year is invalid"),
+  body('session')
+    .notEmpty().withMessage("Session is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Session is invalid"),
+  , sendErrors
+]
+
+exports.branchValidator = [
+  body('code')
+    .notEmpty().withMessage('Branch code is required')
+    .bail()
+    .isString().withMessage('Branch code is invalid'),
+  body('name')
+    .notEmpty().withMessage('Branch name is required')
+    .bail()
+    .isString().withMessage('Branch name is required'),
+  , sendErrors
 ]

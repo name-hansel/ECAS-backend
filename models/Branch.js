@@ -10,6 +10,10 @@ const BranchSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
+  }, archived: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 }, { timestamps: true })
 

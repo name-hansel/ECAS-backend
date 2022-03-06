@@ -4,6 +4,8 @@ const router = express.Router();
 const ExamCell = require("../../models/ExamCell")
 const { examCellValidator, idValidator } = require("../../utils/validationMiddleware")
 
+// TODO duplicate employee ID and email error handling
+
 // @route   GET /api/admin/exam_cell/:_id
 // @desc    Get examcell member by id
 // @access  Private
@@ -44,7 +46,6 @@ router.post("/", examCellValidator, async (req, res) => {
   try {
     const newExamCellMember = new ExamCell({
       employeeId: req.body.employeeId,
-      salutation: req.body.salutation,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
@@ -54,10 +55,20 @@ router.post("/", examCellValidator, async (req, res) => {
     const examCellMember = await newExamCellMember.save();
     res.status(201).json(examCellMember);
   } catch (err) {
-    console.error(err.message);
-    return res.status(500).json({
-      error: "Server error",
-    });
+    if (!err.code) {
+      console.error(err.message);
+      return res.status(500).json({
+        error: "Server error",
+      });
+    }
+    if (err.code === 11000) {
+      res.status(400).json({
+        error: [{
+          param: Object.keys(err.keyPattern)[0],
+          msg: `A user with this data already exists`
+        }]
+      })
+    }
   }
 })
 
@@ -71,7 +82,6 @@ router.put("/:_id", [idValidator, examCellValidator], async (req, res) => {
     // Find the examcell member by id and update
     const updatedExamCellMemberData = await ExamCell.findByIdAndUpdate(_id, {
       employeeId: req.body.employeeId,
-      salutation: req.body.salutation,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,

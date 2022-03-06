@@ -22,7 +22,11 @@ const CourseSchema = new mongoose.Schema({
   }, examTypes: [{
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-  }]
+  }], archived: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 }, { timestamps: true })
 
 module.exports = mongoose.model("Course", CourseSchema)

@@ -62,7 +62,10 @@ router.post("/login", body("password", "Password is required").notEmpty(), async
 // @route   POST /api/admin/auth/change-password
 // @desc    Change admin password
 // @access  Public
-router.post("/change-password", [adminAuthMiddleware, body("oldPassword", "Old password is required").notEmpty(), body("newPassword", "New password is required").notEmpty()], async (req, res) => {
+router.post("/change-password", [adminAuthMiddleware,
+  body("oldPassword", "Old password is required").notEmpty(),
+  body("newPassword", "New password is required").notEmpty()
+], async (req, res) => {
   try {
     // Check if express-validator threw errors
     const errors = validationResult(req);

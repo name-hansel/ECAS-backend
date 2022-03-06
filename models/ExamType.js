@@ -12,6 +12,10 @@ const ExamTypeSchema = new mongoose.Schema({
   }, totalMarks: {
     type: Number,
     required: true
+  }, archived: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 })
 

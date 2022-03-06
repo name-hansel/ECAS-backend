@@ -36,7 +36,11 @@ const FacultySchema = new mongoose.Schema({
       required: true,
       ref: "AcademicSession"
     }
-  }]
+  }], archived: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 }, { timestamps: true })
 
 module.exports = mongoose.model("Faculty", FacultySchema)

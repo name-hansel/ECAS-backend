@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken")
 const qs = require("querystring")
 
 const ExamCell = require("../models/ExamCell")
+const Student = require("../models/Student")
+const Faculty = require("../models/Faculty")
 
 // @route   GET /api/auth/
 // @desc    Load user
@@ -23,7 +25,8 @@ router.get("/", (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      picture: user.picture,
     })
   } catch (err) {
     console.error(err.message)
@@ -89,7 +92,7 @@ router.get("/google/:role", async (req, res) => {
     const user = jwt.decode(id_token)
 
     // Find user in database
-    const userData = role === "exam_cell" ? await ExamCell.findOne({ email: user.email }) : role === "student" ? false : false;
+    const userData = role === "exam_cell" ? await ExamCell.findOne({ email: user.email }) : role === "student" ? await Student.findOne({ email: user.email }) : await Faculty.findOne({ email: user.email });
     if (!userData) return res.redirect("http://localhost:3000?error=user_not_found")
 
     // Create a jwt with user id and role
