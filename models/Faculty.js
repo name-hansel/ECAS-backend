@@ -22,21 +22,7 @@ const FacultySchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  }, assignedCourses: [{
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true
-    }, class: { // "SEM6 - A"
-      type: String,
-      required: true,
-      trim: true,
-    }, academicSession: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "AcademicSession"
-    }
-  }], archived: {
+  }, archived: {
     type: Boolean,
     required: true,
     default: false

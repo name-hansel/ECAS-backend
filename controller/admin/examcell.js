@@ -91,10 +91,20 @@ router.put("/:_id", [idValidator, examCellValidator], async (req, res) => {
 
     res.status(200).json(updatedExamCellMemberData)
   } catch (err) {
-    console.error(err.message);
-    return res.status(500).json({
-      error: "Server error",
-    });
+    if (!err.code) {
+      console.error(err.message);
+      return res.status(500).json({
+        error: "Server error",
+      });
+    }
+    if (err.code === 11000) {
+      res.status(400).json({
+        error: [{
+          param: Object.keys(err.keyPattern)[0],
+          msg: `A user with this data already exists`
+        }]
+      })
+    }
   }
 })
 

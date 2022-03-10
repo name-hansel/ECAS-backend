@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 const { examCellAuthMiddleware } = require('../utils/authMiddleware');
-// const academicSessionRouter = require("../controller/examCell/academicSession")
+const branchRouter = require("../controller/exam-cell/branch")
+const studentRouter = require("../controller/exam-cell/student")
 
-// router.use("/academic_session", examCellAuthMiddleware, academicSessionRouter);
+router.use("/branch", examCellAuthMiddleware, branchRouter);
+router.use("/student", examCellAuthMiddleware, studentRouter);
+
 
 module.exports = router;

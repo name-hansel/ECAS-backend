@@ -48,23 +48,6 @@ exports.examCellValidator = [
     .isMobilePhone("en-IN").withMessage("Phone number is invalid"), sendErrors
 ]
 
-exports.academicSessionValidator = [
-  body('from')
-    .notEmpty().withMessage("From year is required")
-    .bail()
-    .isNumeric().withMessage("From year is invalid"),
-  body('to')
-    .notEmpty().withMessage("To year is required")
-    .bail()
-    .isNumeric().withMessage("To year is invalid"),
-  body('session')
-    .notEmpty().withMessage("Session is required")
-    .bail()
-    .trim()
-    .isString().withMessage("Session is invalid"),
-  , sendErrors
-]
-
 exports.branchValidator = [
   body('code')
     .notEmpty().withMessage('Branch code is required')
@@ -73,6 +56,53 @@ exports.branchValidator = [
   body('name')
     .notEmpty().withMessage('Branch name is required')
     .bail()
-    .isString().withMessage('Branch name is required'),
+    .isString().withMessage('Branch name is required')
   , sendErrors
+]
+
+exports.studentValidator = [
+  body('admissionNumber')
+    .notEmpty().withMessage('Admission number is required')
+    .bail()
+    .isString().withMessage('Admission number is invalid'),
+  body('firstName')
+    .notEmpty().withMessage('First name is required')
+    .bail()
+    .isString().withMessage('First name is invalid'),
+  body('middleName')
+    .optional()
+    .isString().withMessage('Middle name is invalid'),
+  body('lastName')
+    .notEmpty().withMessage('Last name is required')
+    .bail()
+    .isString().withMessage('Last name is invalid'),
+  body('branch')
+    .notEmpty().withMessage('Branch is required')
+    .bail()
+    .custom(value => {
+      if (!isValidObjectId(value)) {
+        throw new Error("ID is not valid")
+      }
+      return true
+    }),
+  body('currentSemester')
+    .notEmpty().withMessage('Current semester is required')
+    .bail()
+    .isNumeric().withMessage('Current semester is invalid'),
+  body('currentDivision')
+    .notEmpty().withMessage('Current division is required')
+    .bail()
+    .isString().isLength({ min: 1, max: 1 }).withMessage('Current division is invalid'),
+  body('email')
+    .notEmpty().withMessage("Email is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Email is invalid")
+    .isEmail().withMessage("Email is invalid"),
+  body('phoneNumber')
+    .notEmpty().withMessage("Phone number is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Phone number is invalid")
+    .isMobilePhone("en-IN").withMessage("Phone number is invalid"), sendErrors
 ]
