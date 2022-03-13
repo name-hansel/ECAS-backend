@@ -106,3 +106,33 @@ exports.studentValidator = [
     .isString().withMessage("Phone number is invalid")
     .isMobilePhone("en-IN").withMessage("Phone number is invalid"), sendErrors
 ]
+
+exports.facultyValidator = [
+  body('employeeId')
+    .notEmpty().withMessage("Employee ID is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Employee ID is invalid"),
+  body('firstName')
+    .notEmpty().withMessage("First name is required")
+    .bail()
+    .trim()
+    .isString().withMessage("First name is invalid"),
+  body('lastName')
+    .notEmpty().withMessage("Last name is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Last name is invalid"),
+  body('email')
+    .notEmpty().withMessage("Email is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Email is invalid")
+    .isEmail().withMessage("Email is invalid"),
+  body('department')
+    .notEmpty().withMessage('Department is required')
+    .bail()
+    .trim()
+    .isString().withMessage('Department is invalid'),
+  sendErrors
+]

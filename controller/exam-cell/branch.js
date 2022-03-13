@@ -31,7 +31,14 @@ router.get("/:_id", idValidator, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const branchData = await Branch.find();
-    res.status(200).json(branchData)
+    const sortedBranchData = {
+      archived: [],
+      active: []
+    };
+    for (let i = 0; i < branchData.length; i++) {
+      branchData[i].archived ? sortedBranchData.archived.push(branchData[i]) : sortedBranchData.active.push(branchData[i])
+    }
+    res.status(200).json(sortedBranchData)
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({

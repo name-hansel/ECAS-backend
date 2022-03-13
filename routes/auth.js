@@ -92,7 +92,9 @@ router.get("/google/:role", async (req, res) => {
     const user = jwt.decode(id_token)
 
     // Find user in database
-    const userData = role === "exam_cell" ? await ExamCell.findOne({ email: user.email }) : role === "student" ? await Student.findOne({ email: user.email }) : await Faculty.findOne({ email: user.email });
+    const userData = role === "exam_cell" ? await ExamCell.findOne({ email: user.email }) : role === "student" ? await Student.findOne({ email: user.email, archived: false }) : await Faculty.findOne({
+      email: user.email, archived: false
+    });
     if (!userData) return res.redirect("http://localhost:3000?error=user_not_found")
 
     // Create a jwt with user id and role

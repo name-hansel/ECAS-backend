@@ -13,7 +13,7 @@ router.get("/:_id", idValidator, async (req, res) => {
     const studentData = await Student.findOne({ _id, archived: false })
 
     if (!studentData) return res.status(404).json({
-      error: 'Branch not found'
+      error: 'Student not found'
     })
 
     res.status(200).json(studentData)
