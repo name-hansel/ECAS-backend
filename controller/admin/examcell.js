@@ -4,8 +4,6 @@ const router = express.Router();
 const ExamCell = require("../../models/ExamCell")
 const { examCellValidator, idValidator } = require("../../utils/validationMiddleware")
 
-// TODO duplicate employee ID and email error handling
-
 // @route   GET /api/admin/exam_cell/:_id
 // @desc    Get examcell member by id
 // @access  Private

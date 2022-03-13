@@ -1,4 +1,4 @@
-const { body, validationResult, param } = require('express-validator');
+const { body, validationResult, param, check } = require('express-validator');
 const { isValidObjectId } = require("mongoose")
 
 const sendErrors = (req, res, next) => {
@@ -134,5 +134,25 @@ exports.facultyValidator = [
     .bail()
     .trim()
     .isString().withMessage('Department is invalid'),
+  sendErrors
+]
+
+exports.noticeValidator = [
+  body('title')
+    .notEmpty().withMessage('Title is required')
+    .bail()
+    .isString().withMessage('Title is invalid'),
+  body('description')
+    .optional()
+    .isString().withMessage('Description is invalid'),
+  check('branch.*')
+    .custom(value => {
+      if (!isValidObjectId(value)) {
+        throw new Error("ID is not valid")
+      }
+      return true
+    }),
+  check('semester.*')
+    .isNumeric().withMessage('Semester is invalid'),
   sendErrors
 ]
