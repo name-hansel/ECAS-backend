@@ -10,7 +10,7 @@ const { idValidator, noticeValidator } = require("../../utils/validationMiddlewa
 router.get("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
-    const noticeData = await Notice.findOne({ _id })
+    const noticeData = await Notice.findOne({ _id }).populate('branch')
 
     if (!noticeData) return res.status(404).json({
       error: 'Notice not found'
@@ -30,7 +30,7 @@ router.get("/:_id", idValidator, async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const noticeData = await Notice.find();
+    const noticeData = await Notice.find().populate('branch');
     res.status(200).json(noticeData)
   } catch (err) {
     console.error(err.message);
@@ -50,8 +50,9 @@ router.post("/", noticeValidator, async (req, res) => {
     const newNotice = new Notice({
       title, description, branch, semester
     })
-    const branchData = await newNotice.save();
-    res.status(201).json(branchData);
+    const noticeData = await newNotice.save();
+    await noticeData.populate('branch');
+    res.status(201).json(noticeData);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -70,7 +71,7 @@ router.put('/:_id', idValidator, noticeValidator, async (req, res) => {
     const { title, description, branch, semester } = req.body;
     const updatedNotice = await Notice.findByIdAndUpdate(_id, {
       title, description, branch, semester
-    }, { new: true })
+    }, { new: true }).populate('branch')
 
     if (!updatedNotice) return res.status(404).json({
       error: "Notice not found"
