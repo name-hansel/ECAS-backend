@@ -10,7 +10,7 @@ const { studentValidator, idValidator } = require("../../utils/validationMiddlew
 router.get("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
-    const studentData = await Student.findOne({ _id, archived: false })
+    const studentData = await Student.findOne({ _id, archived: false }).populate('branch')
 
     if (!studentData) return res.status(404).json({
       error: 'Student not found'
@@ -30,8 +30,14 @@ router.get("/:_id", idValidator, async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const studentData = await Student.find();
-    res.status(200).json(studentData)
+    const studentData = await Student.find().populate('branch');
+    const sortedStudentData = {
+      active: [],
+      archived: []
+    };
+    studentData.forEach((student) => student.archived ? sortedStudentData.archived.push(student) : sortedStudentData.active.push(student))
+
+    res.status(200).json(sortedStudentData)
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -57,6 +63,7 @@ router.post("/", studentValidator, async (req, res) => {
       phoneNumber: req.body.phoneNumber,
     })
     const newStudent = await studentData.save();
+    await newStudent.populate('branch')
     res.status(201).json(newStudent);
   } catch (err) {
     if (!err.code) {
@@ -69,7 +76,7 @@ router.post("/", studentValidator, async (req, res) => {
       res.status(400).json({
         error: [{
           param: Object.keys(err.keyPattern)[0],
-          msg: `A branch with this data already exists`
+          msg: `A student with this data already exists`
         }]
       })
     }
@@ -92,7 +99,7 @@ router.put("/:_id", idValidator, studentValidator, async (req, res) => {
       currentDivision: req.body.currentDivision,
       email: req.body.email,
       phoneNumber: req.body.phoneNumber,
-    }, { new: true })
+    }, { new: true }).populate('branch')
 
     if (!updatedStudent) return res.status(404).json({
       error: "Student not found"
@@ -109,7 +116,7 @@ router.put("/:_id", idValidator, studentValidator, async (req, res) => {
       res.status(400).json({
         error: [{
           param: Object.keys(err.keyPattern)[0],
-          msg: `A branch with this data already exists`
+          msg: `A student with this data already exists`
         }]
       })
     }
