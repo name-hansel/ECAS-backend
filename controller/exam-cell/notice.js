@@ -79,7 +79,7 @@ router.get("/:_id", idValidator, async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const noticeData = await Notice.find().populate('branch');
+    const noticeData = await Notice.find().sort({ createdAt: -1 }).populate('branch');
     res.status(200).json(noticeData)
   } catch (err) {
     console.error(err.message);
