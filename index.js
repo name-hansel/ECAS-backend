@@ -21,11 +21,13 @@ connectToDatabase();
 const commonAuthRouter = require("./routes/auth")
 const adminRouter = require("./routes/admin")
 const examCellRouter = require("./routes/examCell")
+const publicRouter = require("./routes/public")
 
 // Routes
 app.use("/api/auth", commonAuthRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/exam_cell", examCellRouter);
+app.use("/api/public", publicRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`)

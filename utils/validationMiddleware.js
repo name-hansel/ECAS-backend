@@ -154,5 +154,8 @@ exports.noticeValidator = [
     }),
   check('semester.*')
     .isNumeric().withMessage('Semester is invalid'),
+  check('files.*')
+    .optional()
+    .isString().withMessage('File name is invalid'),
   sendErrors
 ]
