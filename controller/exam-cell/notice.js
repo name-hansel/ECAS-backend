@@ -8,7 +8,6 @@ const { idValidator, noticeValidator } = require("../../utils/validationMiddlewa
 
 const s3 = new AWS.S3();
 const upload = multer();
-router.use(upload.array());
 
 // @route   POST /api/exam_cell/notice/document
 // @desc    Upload an document to AWS S3 bucket
@@ -92,7 +91,7 @@ router.get("/", async (req, res) => {
 // @route   POST /api/exam_cell/notice
 // @desc    Add new notice
 // @access  Private
-router.post("/", noticeValidator, async (req, res) => {
+router.post("/", upload.none(), noticeValidator, async (req, res) => {
   try {
     // TODO send email notifications
     const { title, description } = req.body;
@@ -122,7 +121,7 @@ router.post("/", noticeValidator, async (req, res) => {
 // @route   PUT /api/exam_cell/notice/:_id
 // @desc    Edit notice
 // @access  Private
-router.put('/:_id', idValidator, noticeValidator, async (req, res) => {
+router.put('/:_id', upload.none(), idValidator, noticeValidator, async (req, res) => {
   try {
     const { _id } = req.params;
     const { title, description } = req.body;
@@ -153,13 +152,31 @@ router.put('/:_id', idValidator, noticeValidator, async (req, res) => {
 // @access  Private
 router.delete('/:_id', idValidator, async (req, res) => {
   try {
-    // TODO delete attachments
     const { _id } = req.params;
 
     const noticeData = await Notice.findByIdAndDelete(_id);
     if (!noticeData) return res.status(404).json({ error: "Notice not found" })
 
-    res.status(204).end()
+    // Delete files from AWS S3
+    const Objects = [];
+    noticeData.attachments.forEach(file => {
+      Objects.push({
+        Key: file
+      })
+    });
+
+    console.log(Objects)
+
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Delete: {
+        Objects: Objects
+      }
+    }
+
+    await s3.deleteObjects(params).promise();
+
+    res.status(204).end();
   } catch (err) {
     console.error(err.message)
     return res.status(500).json({
