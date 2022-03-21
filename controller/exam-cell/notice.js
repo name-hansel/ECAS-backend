@@ -3,7 +3,7 @@ const router = express.Router();
 const AWS = require("aws-sdk");
 const multer = require('multer');
 
-const Notice = require("../../models/Notice")
+const Notice = require("../../models/Notice");
 const { idValidator, noticeValidator } = require("../../utils/validationMiddleware");
 
 const s3 = new AWS.S3();

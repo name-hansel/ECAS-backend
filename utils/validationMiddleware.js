@@ -206,3 +206,14 @@ exports.noticeValidator = [
     .isString().withMessage('File name is invalid'),
   sendErrors
 ]
+
+exports.faqValidator = [
+  body('question')
+    .optional()
+    .isString().withMessage('Question is invalid'),
+  body('answer')
+    .notEmpty().withMessage('Answer is required')
+    .bail()
+    .isString().withMessage('Answer is invalid'),
+  sendErrors
+]
