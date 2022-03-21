@@ -59,7 +59,7 @@ router.delete('/document/:filename', async (req, res) => {
 router.get("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
-    const noticeData = await Notice.findOne({ _id }).populate('branch')
+    const noticeData = await Notice.findOne({ _id }).populate('branch').populate('addedBy', '_id firstName lastName');
 
     if (!noticeData) return res.status(404).json({
       error: 'Notice not found'
@@ -79,7 +79,7 @@ router.get("/:_id", idValidator, async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const noticeData = await Notice.find().sort({ createdAt: -1 }).populate('branch');
+    const noticeData = await Notice.find().sort({ createdAt: -1 }).populate('branch').populate('addedBy', '_id firstName lastName');
     res.status(200).json(noticeData)
   } catch (err) {
     console.error(err.message);
@@ -100,15 +100,16 @@ router.post("/", noticeValidator, async (req, res) => {
     // Parse received arrays
     const files = JSON.parse(req.body.files);
     const branch = JSON.parse(req.body.branch);
-    const semester = JSON.parse(req.body.semester);
+    const year = JSON.parse(req.body.year);
 
     // Create new notice instance
     const newNotice = new Notice({
-      title, description, branch, semester, attachments: files
+      title, description, branch, year, attachments: files, addedBy: req.user_id
     })
 
     const noticeData = await newNotice.save();
-    await noticeData.populate('branch');
+    await noticeData.populate('branch')
+    await noticeData.populate('addedBy', '_id firstName lastName');
     res.status(201).json(noticeData);
   } catch (err) {
     console.error(err.message);
@@ -129,11 +130,11 @@ router.put('/:_id', idValidator, noticeValidator, async (req, res) => {
     // Parse received arrays
     const files = JSON.parse(req.body.files);
     const branch = JSON.parse(req.body.branch);
-    const semester = JSON.parse(req.body.semester);
+    const year = JSON.parse(req.body.year);
 
     const updatedNotice = await Notice.findByIdAndUpdate(_id, {
-      title, description, branch, semester, attachments: files
-    }, { new: true }).populate('branch')
+      title, description, branch, year, attachments: files
+    }, { new: true }).populate('branch').populate('addedBy', '_id firstName lastName');
 
     if (!updatedNotice) return res.status(404).json({
       error: "Notice not found"

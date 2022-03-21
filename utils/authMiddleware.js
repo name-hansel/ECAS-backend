@@ -36,10 +36,13 @@ const examCellAuthMiddleware = (req, res, next) => {
     const accessToken = req.cookies['access-token']
 
     // Check if access token is valid
-    const { role } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+    const { role, _id } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
 
     // Check if role is exam cell
     if (role !== "exam_cell") return res.status(403).send({ "error": "Please login as Exam Cell" })
+
+    // Set id in req object
+    req.user_id = _id;
 
     next();
   } catch (err) {

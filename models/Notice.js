@@ -12,14 +12,18 @@ const NoticeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Branch",
     required: true
-  }], semester: [{
+  }], year: [{
     type: Number,
     required: true
   }], attachments: [{
     type: String,
     trim: true,
     required: true
-  }] //TODO notification field ?
+  }], addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ExamCell",
+    required: true
+  } //TODO notification field ?
 }, { timestamps: true })
 
 module.exports = mongoose.model("Notice", NoticeSchema)

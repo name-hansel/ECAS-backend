@@ -107,6 +107,53 @@ exports.studentValidator = [
     .isMobilePhone("en-IN").withMessage("Phone number is invalid"), sendErrors
 ]
 
+exports.studentsValidator = [
+  check('students.*.admissionNumber')
+    .notEmpty().withMessage('Admission number is required')
+    .bail()
+    .isString().withMessage('Admission number is invalid'),
+  check('students.*.firstName')
+    .notEmpty().withMessage('First name is required')
+    .bail()
+    .isString().withMessage('First name is invalid'),
+  check('students.*.middleName')
+    .optional()
+    .isString().withMessage('Middle name is invalid'),
+  check('students.*.lastName')
+    .notEmpty().withMessage('Last name is required')
+    .bail()
+    .isString().withMessage('Last name is invalid'),
+  check('students.*.branch')
+    .notEmpty().withMessage('Branch is required')
+    .bail()
+    .custom(value => {
+      if (!isValidObjectId(value)) {
+        throw new Error("ID is not valid")
+      }
+      return true
+    }),
+  check('students.*.currentSemester')
+    .notEmpty().withMessage('Current semester is required')
+    .bail()
+    .isNumeric().withMessage('Current semester is invalid'),
+  check('students.*.currentDivision')
+    .notEmpty().withMessage('Current division is required')
+    .bail()
+    .isString().isLength({ min: 1, max: 1 }).withMessage('Current division is invalid'),
+  check('students.*.email')
+    .notEmpty().withMessage("Email is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Email is invalid")
+    .isEmail().withMessage("Email is invalid"),
+  check('students.*.phoneNumber')
+    .notEmpty().withMessage("Phone number is required")
+    .bail()
+    .trim()
+    .isString().withMessage("Phone number is invalid")
+    .isMobilePhone("en-IN").withMessage("Phone number is invalid"), sendErrors
+]
+
 exports.facultyValidator = [
   body('employeeId')
     .notEmpty().withMessage("Employee ID is required")
@@ -152,8 +199,8 @@ exports.noticeValidator = [
       }
       return true
     }),
-  check('semester.*')
-    .isNumeric().withMessage('Semester is invalid'),
+  check('year.*')
+    .isNumeric().withMessage('Year is invalid'),
   check('files.*')
     .optional()
     .isString().withMessage('File name is invalid'),

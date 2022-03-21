@@ -1,8 +1,90 @@
 const express = require("express");
 const router = express.Router();
+const multer = require('multer');
+const Papa = require("papaparse");
 
-const Student = require("../../models/Student")
-const { studentValidator, idValidator } = require("../../utils/validationMiddleware")
+const upload = multer();
+
+const Student = require("../../models/Student");
+const Branch = require("../../models/Branch");
+const { studentValidator, studentsValidator, idValidator } = require("../../utils/validationMiddleware")
+
+// @route   GET /api/exam_cell/student/csv
+// @desc    Parse .csv file and return array of student objects
+// @access  Private
+router.get("/csv", upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).send("Invalid csv file");
+    // Read text from .csv file
+    const { data } = Papa.parse(req.file.buffer.toString());
+
+    // TODO check headers of .csv file
+    const headers = [
+      'admissionNumber',
+      'firstName',
+      'middleName',
+      'lastName',
+      'branch',
+      'currentSemester',
+      'currentDivision',
+      'email',
+      'phoneNumber'
+    ];
+
+    // Extract .csv and convert to JSON object
+    const studentData = [];
+    for (let i = 1; i < data.length; i++) {
+      const student = {};
+      for (let j = 0; j < headers.length; j++) {
+        student[headers[j]] = data[i][j];
+      }
+      studentData.push(student);
+    }
+
+    // Create mapping between branch code and _id
+    const branchData = await Branch.find({}, { _id: 1, code: 1 });
+    const branchCodeIdMap = {};
+    branchData.forEach(branch => {
+      branchCodeIdMap[branch.code] = branch._id
+    })
+
+    // Convert branch code to _id
+    const convertedStudentData = studentData.map(student => {
+      return {
+        ...student, branch: branchCodeIdMap[student.branch]
+      }
+    })
+
+    // Return array of student objects
+    res.status(200).json(convertedStudentData);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
+// @route   POST /api/exam_cell/student/csv
+// @desc    Add multiple students
+// @access  Private
+router.post("/csv", studentsValidator, async (req, res) => {
+  try {
+    const students = req.body.students;
+
+    // TODO handle duplicate field errors
+
+    // Add all students
+    const addedStudents = await Student.insertMany(students, { ordered: false });
+
+    res.status(200).json(addedStudents)
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
 
 // @route   GET /api/exam_cell/student/:_id
 // @desc    Get student by id
