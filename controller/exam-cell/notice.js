@@ -33,7 +33,7 @@ router.post("/document", upload.single('file'), async (req, res) => {
   }
 })
 
-// @route   DELETE /api/exam_cell/notice/document
+// @route   DELETE /api/exam_cell/notice/document/:filename
 // @desc    Delete an document from AWS S3 bucket
 // @access  Private
 router.delete('/document/:filename', async (req, res) => {
@@ -43,6 +43,40 @@ router.delete('/document/:filename', async (req, res) => {
       Bucket: process.env.BUCKET_NAME,
       Key: fileName
     }).promise();
+    res.status(204).end();
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
+// @route   DELETE /api/exam_cell/notice/document
+// @desc    Delete multiple documents from AWS S3 bucket
+// @access  Private
+router.delete('/document', async (req, res) => {
+  try {
+    const { files } = req.body;
+    console.log(files)
+
+    // Delete files from AWS S3
+    const Objects = [];
+    files.forEach(file => {
+      Objects.push({
+        Key: file
+      })
+    });
+
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Delete: {
+        Objects: Objects
+      }
+    }
+
+    await s3.deleteObjects(params).promise();
+
     res.status(204).end();
   } catch (err) {
     console.error(err.message);
