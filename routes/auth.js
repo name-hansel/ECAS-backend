@@ -34,7 +34,7 @@ router.get("/", (req, res) => {
       userData['year'] = user.year;
     }
 
-    res.status(200).json(userData)
+    res.status(200).json(userData);
   } catch (err) {
     console.error(err.message)
     res.status(500).json({
@@ -154,20 +154,29 @@ router.post("/dev/:role", async (req, res) => {
   try {
     const { email } = req.body;
     const { role } = req.params;
-    const user = role === "exam_cell" ? await ExamCell.findOne({ email }) : null
+    const user = role === "exam_cell" ? await ExamCell.findOne({ email }) : role === "student" ? await Student.findOne({ email, archived: false }).populate('branch') : null
 
     if (!user) return res.status(404).json({ message: "User not found" })
 
+    const accessTokenData = {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      picture: user.picture,
+      role
+    }
+
+    // Add currentYear and branch to accessTokenData if user is a student
+    if (accessTokenData.role === "student") {
+      accessTokenData['branch'] = user.branch._id;
+      // Get year from semester
+      accessTokenData['year'] = Math.ceil(user.currentSemester / 2);
+    }
+
     // Create a jwt with user id and role
     const accessToken = await jwt.sign(
-      {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        // picture: user.picture,
-        role
-      },
+      accessTokenData,
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: 900000 }
     );
