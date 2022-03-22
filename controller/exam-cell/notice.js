@@ -165,8 +165,6 @@ router.delete('/:_id', idValidator, async (req, res) => {
       })
     });
 
-    console.log(Objects)
-
     const params = {
       Bucket: process.env.BUCKET_NAME,
       Delete: {

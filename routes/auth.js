@@ -20,14 +20,21 @@ router.get("/", (req, res) => {
 
     const user = jwt.verify(req.cookies['access-token'], process.env.ACCESS_TOKEN_SECRET)
 
-    res.status(200).json({
+    const userData = {
       _id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
       role: user.role,
       picture: user.picture,
-    })
+    }
+
+    if (user.role === "student") {
+      userData['branch'] = user.branch;
+      userData['year'] = user.year;
+    }
+
+    res.status(200).json(userData)
   } catch (err) {
     console.error(err.message)
     res.status(500).json({
@@ -92,21 +99,30 @@ router.get("/google/:role", async (req, res) => {
     const user = jwt.decode(id_token)
 
     // Find user in database
-    const userData = role === "exam_cell" ? await ExamCell.findOne({ email: user.email }) : role === "student" ? await Student.findOne({ email: user.email, archived: false }) : await Faculty.findOne({
+    const userData = role === "exam_cell" ? await ExamCell.findOne({ email: user.email }) : role === "student" ? await Student.findOne({ email: user.email, archived: false }).populate('branch') : await Faculty.findOne({
       email: user.email, archived: false
     });
     if (!userData) return res.redirect("http://localhost:3000?error=user_not_found")
 
+    const accessTokenData = {
+      _id: userData._id,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      picture: user.picture,
+      role
+    }
+
+    // Add currentYear and branch to accessTokenData if user is a student
+    if (accessTokenData.role === "student") {
+      accessTokenData['branch'] = userData.branch._id;
+      // Get year from semester
+      accessTokenData['year'] = Math.ceil(userData.currentSemester / 2);
+    }
+
     // Create a jwt with user id and role
     const accessToken = await jwt.sign(
-      {
-        _id: userData._id,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        picture: user.picture,
-        role
-      },
+      accessTokenData,
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: 900000 }
     );
