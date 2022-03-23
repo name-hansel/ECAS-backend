@@ -184,6 +184,8 @@ router.delete('/:_id', idValidator, async (req, res) => {
     const noticeData = await Notice.findByIdAndDelete(_id);
     if (!noticeData) return res.status(404).json({ error: "Notice not found" })
 
+    if (noticeData.attachments.length === 0) return res.status(204).end();
+
     // Delete files from AWS S3
     const Objects = [];
     noticeData.attachments.forEach(file => {
