@@ -125,15 +125,10 @@ router.get("/", async (req, res) => {
 // @route   POST /api/exam_cell/notice
 // @desc    Add new notice
 // @access  Private
-router.post("/", upload.none(), noticeValidator, async (req, res) => {
+router.post("/", noticeValidator, async (req, res) => {
   try {
     // TODO send email notifications
-    const { title, description } = req.body;
-
-    // Parse received arrays
-    const files = JSON.parse(req.body.files);
-    const branch = JSON.parse(req.body.branch);
-    const year = JSON.parse(req.body.year);
+    const { title, description, files, branch, year, sendNotification } = req.body;
 
     // Create new notice instance
     const newNotice = new Notice({
@@ -141,8 +136,6 @@ router.post("/", upload.none(), noticeValidator, async (req, res) => {
     })
 
     const noticeData = await newNotice.save();
-    await noticeData.populate('branch')
-    await noticeData.populate('addedBy', '_id firstName lastName');
     res.status(201).json(noticeData);
   } catch (err) {
     console.error(err.message);
