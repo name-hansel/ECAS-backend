@@ -204,6 +204,13 @@ exports.noticeValidator = [
   check('files.*')
     .optional()
     .isString().withMessage('File name is invalid'),
+  body('sendNotification')
+    .notEmpty().withMessage('Send notification option is required')
+    .bail()
+    .isBoolean().withMessage('Invalid send notification option'),
+  body('sendEmailIn')
+    .optional()
+    .isNumeric().withMessage('Invalid deletion period'),
   sendErrors
 ]
 

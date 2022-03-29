@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
     const noticeData = await Notice.find({
       branch: req.branch,
       year: req.year
-    }).sort({ createdAt: -1 }).populate('branch').populate('addedBy', '_id firstName lastName');
+    }).sort({ createdAt: -1 }).select('title description branch year attachments addedBy').populate('branch').populate('addedBy', '_id firstName lastName');
     res.status(200).json(noticeData)
   } catch (err) {
     console.error(err.message);

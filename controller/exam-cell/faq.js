@@ -38,10 +38,6 @@ router.post("/:_id", faqValidator, async (req, res) => {
   }
 })
 
-// TODO
-// @route   PUT /api/exam_cell/faq/:_id
-// @desc    Edit FAQ of a topic
-// @access  Private
 
 // @route   DELETE /api/exam_cell/faq/:_id/:faq_id
 // @desc    Delete FAQ from topic

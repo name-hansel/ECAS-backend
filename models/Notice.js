@@ -23,7 +23,16 @@ const NoticeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "ExamCell",
     required: true
-  } //TODO notification field ?
+  }, sendNotification: {
+    type: Boolean,
+    required: true,
+    default: false
+  }, sendEmailIn: {  // send email in x minutes
+    type: Number
+  }, jobId: {
+    type: String,
+    trim: true
+  }
 }, { timestamps: true })
 
 module.exports = mongoose.model("Notice", NoticeSchema)

@@ -5,6 +5,7 @@ const multer = require('multer');
 
 const Notice = require("../../models/Notice");
 const { idValidator, noticeValidator } = require("../../utils/validationMiddleware");
+const { addEmailJobToQueue, cancelJob } = require("../../utils/sendMail")
 
 const s3 = new AWS.S3();
 const upload = multer();
@@ -14,9 +15,12 @@ const upload = multer();
 // @access  Private
 router.post("/document", upload.single('file'), async (req, res) => {
   try {
-    const [fileName, ext] = req.file.originalname.split(".");
+    // Get extension of document
+    const name = req.file.originalname.split(".");
+    const ext = name.pop();
+    const fileName = name.join(".");
     const key = `${fileName}_${new Date().toJSON()}.${ext}`
-    const result = await s3.putObject({
+    await s3.putObject({
       Body: req.file.buffer,
       Bucket: process.env.BUCKET_NAME,
       Key: key
@@ -122,20 +126,33 @@ router.get("/", async (req, res) => {
   }
 })
 
+
 // @route   POST /api/exam_cell/notice
 // @desc    Add new notice
 // @access  Private
 router.post("/", noticeValidator, async (req, res) => {
   try {
-    // TODO send email notifications
-    const { title, description, files, branch, year, sendNotification } = req.body;
+    const { title, description, files, branch, year, sendNotification, sendEmailIn } = req.body;
 
     // Create new notice instance
     const newNotice = new Notice({
-      title, description, branch, year, attachments: files, addedBy: req.user_id
+      title, description, branch, year, attachments: files, addedBy: req.user_id, sendNotification
     })
 
+    if (sendNotification) newNotice.sendEmailIn = sendEmailIn;
+
     const noticeData = await newNotice.save();
+    if (!sendNotification) return res.status(201).json(noticeData);
+
+    // Add job to queue
+    const jobId = await addEmailJobToQueue(year, branch, sendEmailIn, title);
+
+    // Save job id in database
+    // If notice is deleted before deletion period
+    // Cancel job
+    noticeData.jobId = jobId;
+    await noticeData.save();
+
     res.status(201).json(noticeData);
   } catch (err) {
     console.error(err.message);
@@ -148,15 +165,10 @@ router.post("/", noticeValidator, async (req, res) => {
 // @route   PUT /api/exam_cell/notice/:_id
 // @desc    Edit notice
 // @access  Private
-router.put('/:_id', upload.none(), idValidator, noticeValidator, async (req, res) => {
+router.put('/:_id', idValidator, noticeValidator, async (req, res) => {
   try {
     const { _id } = req.params;
-    const { title, description } = req.body;
-
-    // Parse received arrays
-    const files = JSON.parse(req.body.files);
-    const branch = JSON.parse(req.body.branch);
-    const year = JSON.parse(req.body.year);
+    const { title, description, files, branch, year } = req.body;
 
     const updatedNotice = await Notice.findByIdAndUpdate(_id, {
       title, description, branch, year, attachments: files
@@ -174,6 +186,29 @@ router.put('/:_id', upload.none(), idValidator, noticeValidator, async (req, res
   }
 })
 
+// Delete Notice by id
+const deleteNoticeById = async (_id) => await Notice.findByIdAndDelete(_id);
+
+// Delete notice attachments
+const deleteNoticeAttachments = async (attachments) => {
+  // Delete files from AWS S3
+  const Objects = [];
+  attachments.forEach(file => {
+    Objects.push({
+      Key: file
+    })
+  });
+
+  const params = {
+    Bucket: process.env.BUCKET_NAME,
+    Delete: {
+      Objects: Objects
+    }
+  }
+
+  await s3.deleteObjects(params).promise();
+}
+
 // @route   DELETE /api/exam_cell/notice/:_id
 // @desc    Delete notice
 // @access  Private
@@ -181,28 +216,33 @@ router.delete('/:_id', idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
 
-    const noticeData = await Notice.findByIdAndDelete(_id);
-    if (!noticeData) return res.status(404).json({ error: "Notice not found" })
+    const noticeData = await Notice.findById(_id);
+    if (!noticeData) return res.status(404).json({ error: "Notice not found" });
 
-    if (noticeData.attachments.length === 0) return res.status(204).end();
-
-    // Delete files from AWS S3
-    const Objects = [];
-    noticeData.attachments.forEach(file => {
-      Objects.push({
-        Key: file
-      })
-    });
-
-    const params = {
-      Bucket: process.env.BUCKET_NAME,
-      Delete: {
-        Objects: Objects
-      }
+    // No attachments and send email option not enabled
+    if (!noticeData.sendNotification) {
+      if (noticeData.attachments.length !== 0) await deleteNoticeAttachments(noticeData.attachments);
+      await deleteNoticeById(_id);
+      return res.status(204).end();
     }
 
-    await s3.deleteObjects(params).promise();
+    // Send email option was enabled
+    // Check if period has passed
+    const timeNow = Date.parse(new Date());
+    const createdAt = Date.parse(noticeData.createdAt);
+    const differenceInMinutes = (timeNow - createdAt) / (1000 * 60);
+    if (differenceInMinutes > noticeData.sendEmailIn) {
+      // Send email in period is over
+      return res.status(400).json({
+        error: "Cannot delete notice as emails have been sent."
+      })
+    }
 
+    // Emails have not been send
+    // Cancel email job
+    await cancelJob(noticeData.jobId);
+    if (noticeData.attachments.length !== 0) await deleteNoticeAttachments(noticeData.attachments);
+    await deleteNoticeById(_id);
     res.status(204).end();
   } catch (err) {
     console.error(err.message)
