@@ -126,7 +126,6 @@ router.get("/", async (req, res) => {
   }
 })
 
-
 // @route   POST /api/exam_cell/notice
 // @desc    Add new notice
 // @access  Private
