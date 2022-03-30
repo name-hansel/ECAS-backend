@@ -48,7 +48,7 @@ const makeNoticeVisible = async (_id) => {
 
 const sendMail = async (_id, semesters, branch, title) => {
   try {
-    const studentData = await Student.find({ currentSemester: semesters, branch }).select('email -_id');
+    const studentData = await Student.find({ currentSemester: semesters, branch, archived: false }).select('email -_id');
     const emails = studentData.map(student => student.email);
     await makeNoticeVisible(_id);
     await nodemailerSendMail(emails, title);
