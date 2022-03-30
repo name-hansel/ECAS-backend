@@ -11,7 +11,7 @@ router.get("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
     const noticeData = await Notice.findById(_id).sort({ createdAt: -1 }).select('title description branch year attachments addedBy').populate('branch').populate('addedBy', '_id firstName lastName');
-    if (!noticeData) return res.status(404).json({
+    if (!noticeData || !noticeData.visible) return res.status(404).json({
       error: 'Notice not found'
     })
 
@@ -30,6 +30,7 @@ router.get("/:_id", idValidator, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const noticeData = await Notice.find({
+      visible: true,
       branch: req.branch,
       year: req.year
     }).sort({ createdAt: -1 }).select('title description branch year attachments addedBy').populate('branch').populate('addedBy', '_id firstName lastName');

@@ -138,13 +138,17 @@ router.post("/", noticeValidator, async (req, res) => {
       title, description, branch, year, attachments: files, addedBy: req.user_id, sendNotification
     })
 
-    if (sendNotification) newNotice.sendEmailIn = sendEmailIn;
+    if (sendNotification) {
+      newNotice.sendEmailIn = sendEmailIn;
+      // Set visible to false as students can see only after sendEmailIn period is over
+      newNotice.visible = false;
+    }
 
     const noticeData = await newNotice.save();
     if (!sendNotification) return res.status(201).json(noticeData);
 
     // Add job to queue
-    const jobId = await addEmailJobToQueue(year, branch, sendEmailIn, title);
+    const jobId = await addEmailJobToQueue(noticeData._id, year, branch, sendEmailIn, title);
 
     // Save job id in database
     // If notice is deleted before deletion period
@@ -161,6 +165,7 @@ router.post("/", noticeValidator, async (req, res) => {
   }
 })
 
+// TODO
 // @route   PUT /api/exam_cell/notice/:_id
 // @desc    Edit notice
 // @access  Private

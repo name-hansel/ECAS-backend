@@ -2,6 +2,7 @@ const Bull = require('bull');
 const nodemailer = require('nodemailer');
 
 const Student = require("../models/Student");
+const Notice = require("../models/Notice");
 
 const sendEmailQueue = new Bull('email-queue');
 
@@ -41,19 +42,24 @@ const nodemailerSendMail = (emails, title) => {
   })
 }
 
-const sendMail = async (semesters, branch, title) => {
+const makeNoticeVisible = async (_id) => {
+  await Notice.findByIdAndUpdate(_id, { $set: { visible: true } });
+}
+
+const sendMail = async (_id, semesters, branch, title) => {
   try {
     const studentData = await Student.find({ currentSemester: semesters, branch }).select('email -_id');
     const emails = studentData.map(student => student.email);
+    await makeNoticeVisible(_id);
     await nodemailerSendMail(emails, title);
   } catch (err) {
     console.error(err);
   }
 }
 
-sendEmailQueue.process(async (job) => await sendMail(job.data.semesters, job.data.branch, job.data.title));
+sendEmailQueue.process(async (job) => await sendMail(job.data._id, job.data.semesters, job.data.branch, job.data.title));
 
-const addEmailJobToQueue = async (year, branch, sendEmailIn, title) => {
+const addEmailJobToQueue = async (_id, year, branch, sendEmailIn, title) => {
   // Get semesters from year
   const semesters = [];
   year.forEach(y => {
@@ -62,6 +68,7 @@ const addEmailJobToQueue = async (year, branch, sendEmailIn, title) => {
 
   // Add job to queue
   const { id } = await sendEmailQueue.add({
+    _id,
     semesters,
     branch,
     title

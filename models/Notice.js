@@ -23,6 +23,10 @@ const NoticeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "ExamCell",
     required: true
+  }, visible: {     // Visible to students or not
+    type: Boolean,
+    required: true,
+    default: true
   }, sendNotification: {
     type: Boolean,
     required: true,
