@@ -148,7 +148,7 @@ router.post("/", noticeValidator, async (req, res) => {
     if (!sendNotification) return res.status(201).json(noticeData);
 
     // Add job to queue
-    const jobId = await addEmailJobToQueue(noticeData._id, year, branch, sendEmailIn, title);
+    const jobId = await addEmailJobToQueue(noticeData._id, sendEmailIn);
 
     // Save job id in database
     // If notice is deleted before deletion period
@@ -165,7 +165,6 @@ router.post("/", noticeValidator, async (req, res) => {
   }
 })
 
-// TODO
 // @route   PUT /api/exam_cell/notice/:_id
 // @desc    Edit notice
 // @access  Private
@@ -173,15 +172,33 @@ router.put('/:_id', idValidator, noticeValidator, async (req, res) => {
   try {
     const { _id } = req.params;
     const { title, description, files, branch, year } = req.body;
+    const oldNoticeData = await Notice.findById(_id);
+    if (!oldNoticeData) return res.status(404).json({
+      error: 'Notice not found'
+    });
 
-    const updatedNotice = await Notice.findByIdAndUpdate(_id, {
-      title, description, branch, year, attachments: files
-    }, { new: true }).populate('branch').populate('addedBy', '_id firstName lastName');
+    if (!oldNoticeData.sendNotification) {
+      const newNotice = await Notice.findByIdAndUpdate(_id, {
+        $set: {
+          title, description, attachments: files, branch, year
+        }
+      }, { new: true })
+      return res.status(200).json(newNotice);
+    }
 
-    if (!updatedNotice) return res.status(404).json({
-      error: "Notice not found"
+    // Check if visible
+    // Visible means that the emails have been sent
+    if (oldNoticeData.visible) return res.status(400).json({
+      error: 'Cannot edit notice as emails have already been sent'
     })
-    res.status(200).json(updatedNotice)
+
+    // Edit notice
+    const newNotice = await Notice.findByIdAndUpdate(_id, {
+      $set: {
+        title, description, attachments: files, branch, year
+      }
+    }, { new: true });
+    return res.status(200).json(newNotice);
   } catch (err) {
     console.error(err.message)
     return res.status(500).json({

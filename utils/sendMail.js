@@ -43,35 +43,33 @@ const nodemailerSendMail = (emails, title) => {
 }
 
 const makeNoticeVisible = async (_id) => {
-  await Notice.findByIdAndUpdate(_id, { $set: { visible: true } });
+  return await Notice.findByIdAndUpdate(_id, { $set: { visible: true } }, { new: true });
 }
 
-const sendMail = async (_id, semesters, branch, title) => {
+const sendMail = async (_id) => {
   try {
-    const studentData = await Student.find({ currentSemester: semesters, branch, archived: false }).select('email -_id');
+    const notice = await makeNoticeVisible(_id);
+
+    // Get semesters from year
+    const semesters = [];
+    notice.year.forEach(y => {
+      semesters.push(y * 2 - 1, y * 2);
+    });
+
+    const studentData = await Student.find({ currentSemester: semesters, branch: notice.branch, archived: false }).select('email -_id');
     const emails = studentData.map(student => student.email);
-    await makeNoticeVisible(_id);
-    await nodemailerSendMail(emails, title);
+    await nodemailerSendMail(emails, notice.title);
   } catch (err) {
     console.error(err);
   }
 }
 
-sendEmailQueue.process(async (job) => await sendMail(job.data._id, job.data.semesters, job.data.branch, job.data.title));
+sendEmailQueue.process(async (job) => await sendMail(job.data._id));
 
-const addEmailJobToQueue = async (_id, year, branch, sendEmailIn, title) => {
-  // Get semesters from year
-  const semesters = [];
-  year.forEach(y => {
-    semesters.push(y * 2 - 1, y * 2);
-  });
-
+const addEmailJobToQueue = async (_id, sendEmailIn) => {
   // Add job to queue
   const { id } = await sendEmailQueue.add({
-    _id,
-    semesters,
-    branch,
-    title
+    _id
   }, { delay: 1000 * 60 * sendEmailIn });
 
   // Return job id
