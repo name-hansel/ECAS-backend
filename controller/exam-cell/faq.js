@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 
-// Model will be trained for delete topic and qna routes
-
 const FAQ = require("../../models/FAQ");
 const { idValidator, faqValidator } = require("../../utils/validationMiddleware");
 
-// QnA
-// const tf = require('@tensorflow/tfjs-node');
-// const qna = require('@tensorflow-models/qna');
+// ! FAQ topics contain FAQ
+// ! Model will search among all FAQs from all topics
+// ? Maybe take topic name and search only in that?
+// Use Bull to extract passage
 
 // FAQ routes
 
