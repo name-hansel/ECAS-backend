@@ -224,3 +224,14 @@ exports.faqValidator = [
     .isString().withMessage('Answer is invalid'),
   sendErrors
 ]
+
+exports.seatingArrangementValidator = [
+  body('title')
+    .notEmpty().withMessage('Title is required')
+    .bail()
+    .isString().withMessage('Invalid title'),
+  body('dateOfExam')
+    .notEmpty().withMessage('Date of exam is required')
+    .bail(),
+  sendErrors
+]

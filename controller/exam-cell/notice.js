@@ -62,7 +62,6 @@ router.delete('/document/:filename', async (req, res) => {
 router.delete('/document', async (req, res) => {
   try {
     const { files } = req.body;
-    console.log(files)
 
     // Delete files from AWS S3
     const Objects = [];
