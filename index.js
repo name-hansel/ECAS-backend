@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
+
+const initializeGA = require("./config/restartGA")
 
 const app = express();
 require("dotenv").config();
@@ -16,11 +18,11 @@ const PORT = process.env.PORT || 5000;
 
 // Database connection
 const connectToDatabase = require("./config/database")
-connectToDatabase();
+connectToDatabase().then(initializeGA)
 
 // Load model
-const { loadModel } = require("./controller/student/faq")
-loadModel();
+// const { loadModel } = require("./controller/student/faq")
+// loadModel();
 
 const commonAuthRouter = require("./routes/auth")
 const adminRouter = require("./routes/admin")
