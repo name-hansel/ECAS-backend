@@ -55,8 +55,6 @@ const geneticAlgorithm = (studentDetails, roomDetails, courseDetails) => {
   let currentGeneration = 1;
   // Start iterating through generations
   while (currentGeneration <= GENERATION_LIMIT) {
-    console.log(`Generation: ${currentGeneration}`);
-
     // Calculate fitness of each chromosome (solution) in population and store
     const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution, roomDetails, subjectDissimilarityData, numberOfSeats))
 
