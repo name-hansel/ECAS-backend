@@ -74,7 +74,7 @@ router.post("/", upload.fields([{
     // Convert title to lowercase and URL encode to save in S3 bucket
     const lowerTitle = encodeURI(title.toLowerCase());
 
-    // Check if dateOfExam is in the past
+    // TODO Check if dateOfExam is in the past
 
     // Create SA instance
     const newSeatingArrangement = new SeatingArrangement({
@@ -154,7 +154,7 @@ router.delete("/:_id", idValidator, async (req, res) => {
       const thread = active_worker_threads[index];
       if (index !== -1) {
         // Terminate worker thread
-        thread.postMessage("terminate");
+        await thread.terminate();
         // Remove thread from array
         active_worker_threads.splice(index, 1);
       }

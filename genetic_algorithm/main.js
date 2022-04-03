@@ -13,17 +13,6 @@ const getFiles = require("./utils/getFiles");
 const parseCSV = require("./utils/parseCSV");
 const geneticAlgorithm = require("./GA");
 
-// Terminate thread
-parentPort.on("message", (data) => {
-  if (data === "terminate") {
-    mongoose.disconnect();
-    console.log('Exiting thread...')
-    process.exit(0);
-  } else {
-    console.log(data);
-  }
-})
-
 const geneticAlgorithmStart = async () => {
   try {
     console.log(`In thread ${threadId}`);
