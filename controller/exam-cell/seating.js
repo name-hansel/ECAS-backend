@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { Worker } = require("worker_threads");
+const { Worker, SHARE_ENV } = require("worker_threads");
 const AWS = require("aws-sdk");
 const multer = require('multer');
 
@@ -69,7 +69,6 @@ router.post("/", upload.fields([{
     const newSeatingArrangement = new SeatingArrangement({
       title, dateOfExam
     })
-
     await newSeatingArrangement.save();
 
     // Upload files to AWS
@@ -102,14 +101,12 @@ router.post("/", upload.fields([{
     newSeatingArrangement.courseFile = courseFileName;
     newSeatingArrangement.roomFile = roomFileName;
 
-    // Parse csv to JSON
-
     const workerData = {
-      student: [1, 2, 4]
+      _id: newSeatingArrangement._id.toString(), studentFileName, courseFileName, roomFileName, lowerTitle
     }
 
     const thread = new Worker("./genetic_algorithm/main.js", {
-      workerData
+      workerData, env: SHARE_ENV
     })
 
     // Add thread to array
@@ -142,7 +139,7 @@ router.delete("/:_id", idValidator, async (req, res) => {
     // Terminate thread
     if (!seatingArrangementData.complete) {
       const thread = findThread(seatingArrangementData.threadId);
-      if (thread !== undefined) await thread.terminate();
+      if (thread !== undefined) thread.postMessage("terminate");
     }
 
     // Delete input files and solution file

@@ -28,6 +28,9 @@ const SeatingArrangementSchema = new mongoose.Schema({
     required: true
   }, threadId: {
     type: Number,
+  }, solutionFile: {
+    type: String,
+    trim: true
   }
 }, { timestamps: true })
 
