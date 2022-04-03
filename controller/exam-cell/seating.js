@@ -5,16 +5,19 @@ const { Worker, SHARE_ENV } = require("worker_threads");
 const AWS = require("aws-sdk");
 const multer = require('multer');
 
-const SeatingArrangement = require("../../models/SeatingArrangement")
-const { seatingArrangementValidator, idValidator } = require("../../utils/validationMiddleware")
+const SeatingArrangement = require("../../models/SeatingArrangement");
+const { seatingArrangementValidator, idValidator } = require("../../utils/validationMiddleware");
+const WorkerThreads = require("../../config/worker_threads_singleton");
 
 const s3 = new AWS.S3();
 const upload = multer();
-const threads = [];
+
 const findThread = (threadId) => {
-  for (let i = 0; i < threads.length; i++) {
-    if (threads[i].threadId === threadId) return threads[i];
+  const { active_worker_threads } = WorkerThreads.getInstance();
+  for (let i = 0; i < active_worker_threads.length; i++) {
+    if (active_worker_threads[i].threadId === threadId) return i;
   }
+  return -1;
 }
 
 // SA -> Seating Arrangement
@@ -45,6 +48,14 @@ router.post("/", upload.fields([{
   name: 'roomFile', maxCount: 1
 }]), seatingArrangementValidator, async (req, res) => {
   try {
+    const { active_worker_threads } = WorkerThreads.getInstance();
+    // Check already running worker threads
+    // Maximum of 5 allowed
+    if (active_worker_threads.length >= 5)
+      return res.status(400).json({
+        error: 'Server is busy.'
+      })
+
     // Check if all files are present
     if (req.files['studentFile'] === undefined) return res.status(400).json({
       error: 'Student details .csv file required'
@@ -110,7 +121,7 @@ router.post("/", upload.fields([{
     })
 
     // Add thread to array
-    threads.push(thread);
+    active_worker_threads.push(thread);
 
     // Add threadId to SA instance
     newSeatingArrangement.threadId = thread.threadId;
@@ -130,6 +141,7 @@ router.post("/", upload.fields([{
 // @access  Private
 router.delete("/:_id", idValidator, async (req, res) => {
   try {
+    const { active_worker_threads } = WorkerThreads.getInstance();
     const { _id } = req.params;
     const seatingArrangementData = await SeatingArrangement.findByIdAndDelete(_id);
     if (!seatingArrangementData) return res.status(404).json({
@@ -138,8 +150,14 @@ router.delete("/:_id", idValidator, async (req, res) => {
 
     // Terminate thread
     if (!seatingArrangementData.complete) {
-      const thread = findThread(seatingArrangementData.threadId);
-      if (thread !== undefined) thread.postMessage("terminate");
+      const index = findThread(seatingArrangementData.threadId);
+      const thread = active_worker_threads[index];
+      if (index !== -1) {
+        // Terminate worker thread
+        thread.postMessage("terminate");
+        // Remove thread from array
+        active_worker_threads.splice(index, 1);
+      }
     }
 
     // Delete input files and solution file

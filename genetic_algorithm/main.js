@@ -36,13 +36,13 @@ const geneticAlgorithmStart = async () => {
 
     // Do GA work here
     console.log(`Starting GA in thread${threadId}`);
-    const { solution, fitness } = geneticAlgorithm(studentDetails, roomDetails, courseDetails);
+    const { solution } = geneticAlgorithm(studentDetails, roomDetails, courseDetails);
     console.log(`Finished GA in thread${threadId}`);
 
     // Array to .csv file
-    solution.unshift(["ROOM_NUMBER", "ROW_NUMBER", "COLUMN_NUMBER", "STUDENT_DETAILS"])
+    solution.unshift(["ROOM_NUMBER", "ROW_NUMBER", "COLUMN_NUMBER", "STUDENT_DETAILS"]);
     const csv = Papa.unparse(solution);
-    const solutionFileName = `${workerData.lowerTitle}_solution.csv`
+    const solutionFileName = `${workerData.lowerTitle}_solution.csv`;
 
     // Upload solution to AWS
     await s3.putObject({
@@ -71,8 +71,7 @@ const geneticAlgorithmStart = async () => {
     await SeatingArrangement.findByIdAndUpdate(workerData._id, {
       $set: {
         failed: true,
-      }, $unset: {
-        threadId: 1
+        threadId: null
       }
     })
     await mongoose.disconnect();
