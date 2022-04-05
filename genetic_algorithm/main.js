@@ -1,17 +1,48 @@
-const { workerData, threadId, parentPort } = require("worker_threads");
+const { workerData, threadId } = require("worker_threads");
 const mongoose = require("mongoose");
 const Papa = require("papaparse");
+const nodemailer = require('nodemailer');
 
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 
 // Database connection
 const connectToDatabase = require("./database");
-const SeatingArrangement = require("../models/SeatingArrangement")
+const SeatingArrangement = require("../models/SeatingArrangement");
 
 const getFiles = require("./utils/getFiles");
 const parseCSV = require("./utils/parseCSV");
 const geneticAlgorithm = require("./GA");
+
+const sendSeatingArrangementMail = (email, title, solution, success) => {
+  const transporter = nodemailer.createTransport({
+    host: "smtp-mail.outlook.com",
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: {
+      user: "pce_examcell@outlook.com",
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  })
+
+  const html = success ? `Seating Arrangement for ${title} has been generated. Download link: <a href="http://localhost:5000/api/public/seating/${solution}">${title} Seating Arrangement</a>` : `Seating Arrangement for ${title} has failed. Delete and try again.`;
+
+  let mailOptions = {
+    from: '"PCE Exam Cell " <pce_examcell@outlook.com>',
+    to: email,
+    html,
+    subject: success ? `${title} seating arrangement is ready.` : `${title} seating arrangement has failed.`,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(info);
+    }
+  })
+}
 
 const geneticAlgorithmStart = async () => {
   try {
@@ -52,8 +83,12 @@ const geneticAlgorithmStart = async () => {
     });
 
     await mongoose.disconnect();
+
+    // Send email to workerData.createdByEmail that seating arrangement has been generated
+    sendSeatingArrangementMail(workerData.createdByEmail, workerData.title, solutionFileName, true);
+
     console.log(`Done with work in thread ${threadId}. Exiting...`);
-    process.exit(0);
+    // process.exit(0);
   } catch (err) {
     console.log(err.message);
     // Set fail to true
@@ -64,6 +99,9 @@ const geneticAlgorithmStart = async () => {
       }
     })
     await mongoose.disconnect();
+
+    sendSeatingArrangementMail(workerData.createdByEmail, workerData.title, solutionFileName, false);
+
     process.exit(1);
   }
 }

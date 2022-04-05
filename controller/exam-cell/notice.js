@@ -25,7 +25,7 @@ router.post("/document", upload.single('file'), async (req, res) => {
       Bucket: process.env.BUCKET_NAME,
       Key: key
     }).promise();
-    res.setHeader('Location', `${process.env.domain}/api/public/document/${key}`);
+    res.setHeader('Location', `${process.env.domain}/api/public/notice/${key}`);
     res.status(201).json({
       fileName: key
     });
