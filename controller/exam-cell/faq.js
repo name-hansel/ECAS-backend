@@ -1,13 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose")
 
 const FAQ = require("../../models/FAQ");
 const { idValidator, faqValidator } = require("../../utils/validationMiddleware");
-
-// ! FAQ topics contain FAQ
-// ! Model will search among all FAQs from all topics
-// ? Maybe take topic name and search only in that?
-// Use Bull to extract passage
+// const { addPassageJobToQueue } = require("../../utils/changePassage")
 
 // FAQ routes
 
@@ -23,11 +20,17 @@ router.post("/:_id", faqValidator, async (req, res) => {
       error: 'Topic not found'
     })
 
+    const faqId = mongoose.Types.ObjectId()
+
     // Push qna to topic
     topicData.questionAndAnswers.push({
-      question, answer
+      _id: faqId, question, answer
     })
     await topicData.save();
+
+    // await addPassageJobToQueue({
+    //   op: 'add', _id: [faqId], answer
+    // });
     res.status(200).json(topicData);
   } catch (err) {
     console.error(err.message);
@@ -36,7 +39,6 @@ router.post("/:_id", faqValidator, async (req, res) => {
     });
   }
 })
-
 
 // @route   DELETE /api/exam_cell/faq/:_id/:faq_id
 // @desc    Delete FAQ from topic
@@ -55,6 +57,11 @@ router.delete("/:_id/:faq_id", idValidator, async (req, res) => {
     if (!updatedTopicData) return res.status(400).json({
       error: 'FAQ not found'
     })
+
+    // await addPassageJobToQueue({
+    //   op: 'remove', _id: [faq_id]
+    // });
+
     res.status(200).json(updatedTopicData)
   } catch (err) {
     console.error(err.message);
@@ -140,6 +147,12 @@ router.delete("/:_id", idValidator, async (req, res) => {
 
     const FAQData = await FAQ.findByIdAndDelete(_id);
     if (!FAQData) return res.status(404).json({ error: "FAQ topic not found" })
+
+    const idArray = FAQData.questionAndAnswers.map((qa) => qa._id);
+
+    // await addPassageJobToQueue({
+    //   op: 'remove', _id: idArray
+    // });
 
     res.status(204).end()
   } catch (err) {
