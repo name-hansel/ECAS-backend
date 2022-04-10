@@ -28,7 +28,19 @@ const findThread = (threadId) => {
 router.get("/", async (req, res) => {
   try {
     const SAData = await SeatingArrangement.find();
-    res.status(200).json(SAData);
+
+    // Sort jobs in 'complete' and 'in progress'
+    const sortedSAData = {
+      inProgress: [],
+      complete: []
+    }
+
+    for (let i = 0; i < SAData.length; i++) {
+      if (SAData[i].complete || SAData[i].failed) sortedSAData.complete.push(SAData[i])
+      else sortedSAData.inProgress.push(SAData[i])
+    }
+
+    res.status(200).json(sortedSAData);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
