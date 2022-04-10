@@ -21,7 +21,6 @@ router.post("/:_id", faqValidator, async (req, res) => {
     })
 
     const faqId = mongoose.Types.ObjectId()
-
     // Push qna to topic
     topicData.questionAndAnswers.push({
       _id: faqId, question, answer
@@ -31,7 +30,9 @@ router.post("/:_id", faqValidator, async (req, res) => {
     // await addPassageJobToQueue({
     //   op: 'add', _id: [faqId], answer
     // });
-    res.status(200).json(topicData);
+    res.status(200).json({
+      _id: faqId, question, answer
+    });
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -72,6 +73,26 @@ router.delete("/:_id/:faq_id", idValidator, async (req, res) => {
 })
 
 // FAQ topic routes
+
+// @route   GET /api/exam_cell/faq
+// @desc    Get one FAQs
+// @access  Private
+router.get("/:_id", idValidator, async (req, res) => {
+  try {
+    const FAQData = await FAQ.findById(req.params._id);
+    if (!FAQData) return res.status(404).json({
+      error: 'FAQ topic not found'
+    })
+
+    res.status(200).json(FAQData)
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
 // @route   GET /api/exam_cell/faq
 // @desc    Get all FAQs
 // @access  Private
