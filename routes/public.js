@@ -9,7 +9,7 @@ const s3 = new AWS.S3();
 router.get("/:documentType/:filename", async (req, res) => {
   try {
     const fileName = req.params.filename;
-    const documentType = req.params.filename;
+    const documentType = req.params.documentType;
     const bucket = documentType === "notice" ? process.env.BUCKET_NAME : process.env.SA_BUCKET_NAME;
 
     const result = await s3.getObject({
