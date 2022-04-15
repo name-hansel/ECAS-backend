@@ -12,7 +12,7 @@ const cancelJob = async (jobId) => {
   return;
 }
 
-const nodemailerSendMail = (emails, title) => {
+const nodemailerSendMail = (emails, title, _id) => {
   const transporter = nodemailer.createTransport({
     host: "smtp-mail.outlook.com",
     port: 587,
@@ -24,7 +24,7 @@ const nodemailerSendMail = (emails, title) => {
     },
   })
 
-  const html = `PCE Exam Cell posted a new announcement: ${title}. Click the link view the announcement: //LINK HERE`
+  const html = `PCE Exam Cell posted a new announcement: ${title}. Click the link view the announcement: <a href="http://localhost:3000/dashboard/notice/${_id}">${title}</a>`
 
   let mailOptions = {
     from: '"PCE Exam Cell " <pce_examcell@outlook.com>',
@@ -58,7 +58,7 @@ const sendMail = async (_id) => {
 
     const studentData = await Student.find({ currentSemester: semesters, branch: notice.branch, archived: false }).select('email -_id');
     const emails = studentData.map(student => student.email);
-    await nodemailerSendMail(emails, notice.title);
+    await nodemailerSendMail(emails, notice.title, _id);
   } catch (err) {
     console.error(err);
   }

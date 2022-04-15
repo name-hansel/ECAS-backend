@@ -55,9 +55,9 @@ const geneticAlgorithmStart = async () => {
     const { studentDetails, roomDetails, courseDetails } = parseCSV(studentFile, courseFile, roomFile);
 
     // Do GA work here
-    console.log(`Starting GA in thread${threadId}`);
+    console.log(`Starting GA in thread ${threadId}`);
     const { solution } = geneticAlgorithm(studentDetails, roomDetails, courseDetails);
-    console.log(`Finished GA in thread${threadId}`);
+    console.log(`Finished GA in thread ${threadId}`);
 
     // Array to .csv file
     solution.unshift(["ROOM_NUMBER", "ROW_NUMBER", "COLUMN_NUMBER", "STUDENT_DETAILS"]);
@@ -101,7 +101,6 @@ const geneticAlgorithmStart = async () => {
     await mongoose.disconnect();
 
     sendSeatingArrangementMail(workerData.createdByEmail, workerData.title, solutionFileName, false);
-
     process.exit(1);
   }
 }

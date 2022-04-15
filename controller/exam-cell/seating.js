@@ -164,6 +164,7 @@ router.delete("/:_id", idValidator, async (req, res) => {
     if (!seatingArrangementData.complete) {
       const index = findThread(seatingArrangementData.threadId);
       const thread = active_worker_threads[index];
+      thread.on("exit", code => console.info(`Worker exited with code ${code}`));
       if (index !== -1) {
         // Terminate worker thread
         await thread.terminate();
