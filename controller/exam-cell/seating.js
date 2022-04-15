@@ -28,19 +28,7 @@ const findThread = (threadId) => {
 router.get("/", async (req, res) => {
   try {
     const SAData = await SeatingArrangement.find();
-
-    // Sort jobs in 'complete' and 'in progress'
-    const sortedSAData = {
-      inProgress: [],
-      complete: []
-    }
-
-    for (let i = 0; i < SAData.length; i++) {
-      if (SAData[i].complete || SAData[i].failed) sortedSAData.complete.push(SAData[i])
-      else sortedSAData.inProgress.push(SAData[i])
-    }
-
-    res.status(200).json(sortedSAData);
+    res.status(200).json(SAData);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -161,7 +149,7 @@ router.delete("/:_id", idValidator, async (req, res) => {
     })
 
     // Terminate thread
-    if (!seatingArrangementData.complete) {
+    if (!seatingArrangementData.complete && !seatingArrangementData.failed) {
       const index = findThread(seatingArrangementData.threadId);
       const thread = active_worker_threads[index];
       thread.on("exit", code => console.info(`Worker exited with code ${code}`));

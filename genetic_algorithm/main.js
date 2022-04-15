@@ -90,7 +90,9 @@ const geneticAlgorithmStart = async () => {
     console.log(`Done with work in thread ${threadId}. Exiting...`);
     // process.exit(0);
   } catch (err) {
-    console.log(err.message);
+    // Connect to database
+    await connectToDatabase(threadId);
+    console.error(err.message);
     // Set fail to true
     await SeatingArrangement.findByIdAndUpdate(workerData._id, {
       $set: {
@@ -100,7 +102,7 @@ const geneticAlgorithmStart = async () => {
     })
     await mongoose.disconnect();
 
-    sendSeatingArrangementMail(workerData.createdByEmail, workerData.title, solutionFileName, false);
+    sendSeatingArrangementMail(workerData.createdByEmail, workerData.title, "", false);
     process.exit(1);
   }
 }
