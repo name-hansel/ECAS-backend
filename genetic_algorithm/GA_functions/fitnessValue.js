@@ -10,7 +10,6 @@ module.exports = function fitnessValue(chromosome, roomDetails, subjectDissimila
     const student = gene[3];
 
     // Check if seat is unoccupied
-    // TODO check if it should be 1
     if (isSeatEmpty(gene)) return 0;
 
     // Get neighbours of a particular seat
@@ -24,17 +23,17 @@ module.exports = function fitnessValue(chromosome, roomDetails, subjectDissimila
 
     // Iterate through neighbours and calculate fitness for each neighbour
     const geneFitness = validNeighbours.map(neighbour => {
-      // Check if neighbour is empty
-      if (isSeatEmpty(neighbour)) return 0;
-
       // Calculate distance between each neighbour
-      const distance = getDistanceBetweenNeighbours([row, column], [neighbour[1], neighbour[2]])
+      const distance = getDistanceBetweenNeighbours([row, column], [neighbour[1], neighbour[2]]);
+
+      // Check if neighbour is empty
+      if (isSeatEmpty(neighbour)) return distance;
 
       // Calculate subject similarity
       const subjectDissimilarity = subjectDissimilarityData[student[1]][neighbour[3][1]];
 
       // Calculate fitness
-      const fitness = (distance * subjectDissimilarity) / ((Math.pow(Number(currentRoomDimensions[0]), 2)) + Math.pow(Number(currentRoomDimensions[1]), 2));
+      const fitness = distance * subjectDissimilarity
 
       return fitness
     })
@@ -43,7 +42,7 @@ module.exports = function fitnessValue(chromosome, roomDetails, subjectDissimila
     return minimumFitness(geneFitness);
   })
 
-  const fitness = Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 2);
+  const fitness = getArraySum(fitnessForEachGene) / numberOfSeats;
 
-  return { solution: chromosome, fitness }
+  return { solution: chromosome, fitness: Math.pow(fitness, 2) }
 }
