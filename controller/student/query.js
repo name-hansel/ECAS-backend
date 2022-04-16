@@ -94,6 +94,9 @@ router.delete("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
     const queryData = await Query.findById(_id).populate('askedBy');
+    if (!queryData) return res.status(404).json({
+      error: 'Query not found'
+    })
     if (queryData.askedBy._id != req._id) return res.status(403).json({
       error: 'Forbidden.'
     })
