@@ -21,7 +21,14 @@ router.get("/user", async (req, res) => {
 
     const queryData = await Query.find({
       askedBy: userId
-    }).populate('askedBy answeredBy');
+    }).sort({ createdAt: -1 }).populate('askedBy answeredBy').populate({
+      path: 'askedBy',
+      populate: [{
+        path: 'branch',
+        model: 'Branch',
+        select: '-_id name'
+      }]
+    });
     res.status(200).json(queryData);
   } catch (err) {
     console.error(err.message);
@@ -36,7 +43,14 @@ router.get("/user", async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const queryData = await Query.find().populate('askedBy answeredBy');
+    const queryData = await Query.find().sort({ createdAt: -1 }).populate('askedBy answeredBy').populate({
+      path: 'askedBy',
+      populate: [{
+        path: 'branch',
+        model: 'Branch',
+        select: '-_id name'
+      }]
+    });
     res.status(200).json(queryData);
   } catch (err) {
     console.error(err.message);
