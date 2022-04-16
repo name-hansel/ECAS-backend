@@ -79,7 +79,11 @@ router.post("/", async (req, res) => {
 router.delete("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
-    const queryData = await Query.findById(_id);
+    const queryData = await Query.findById(_id).populate('askedBy');
+    if (queryData.askedBy._id != req._id) return res.status(403).json({
+      error: 'Forbidden.'
+    })
+
     if (queryData.answer) return res.status(400).json({
       error: 'Answered queries cannot be deleted.'
     })
