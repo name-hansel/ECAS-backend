@@ -21,7 +21,7 @@ router.get("/user", async (req, res) => {
 
     const queryData = await Query.find({
       askedBy: userId
-    }).sort({ createdAt: -1 }).populate('askedBy answeredBy').populate({
+    }).sort({ createdAt: -1 }).populate('askedBy', 'firstName lastName branch currentSemester').populate('answeredBy', 'firstName lastName').populate({
       path: 'askedBy',
       populate: [{
         path: 'branch',
@@ -43,7 +43,7 @@ router.get("/user", async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const queryData = await Query.find().sort({ createdAt: -1 }).populate('askedBy answeredBy').populate({
+    const queryData = await Query.find().sort({ createdAt: -1 }).populate('askedBy', 'firstName lastName branch currentSemester').populate('answeredBy', 'firstName lastName').populate({
       path: 'askedBy',
       populate: [{
         path: 'branch',
@@ -76,7 +76,7 @@ router.post("/", async (req, res) => {
     })
 
     const savedQuery = await newQuery.save();
-    await savedQuery.populate('askedBy');
+    await savedQuery.populate('askedBy', 'firstName lastName branch currentSemester');
 
     res.status(200).json(savedQuery);
   } catch (err) {

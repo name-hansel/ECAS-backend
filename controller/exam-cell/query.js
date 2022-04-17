@@ -10,7 +10,7 @@ const { idValidator } = require("../../utils/validationMiddleware");
 router.get("/:_id", idValidator, async (req, res) => {
   try {
     const { _id } = req.params;
-    const queryData = await Query.findById(_id).populate('askedBy answeredBy').populate({
+    const queryData = await Query.findById(_id).populate('askedBy', 'firstName lastName branch currentSemester').populate('answeredBy', 'firstName lastName').populate({
       path: 'askedBy',
       populate: [{
         path: 'branch',
@@ -18,6 +18,7 @@ router.get("/:_id", idValidator, async (req, res) => {
         select: '-_id name'
       }]
     });
+
     if (!queryData) return res.status(404).json({
       error: 'Query not found'
     })
@@ -36,7 +37,7 @@ router.get("/:_id", idValidator, async (req, res) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const queryData = await Query.find().sort({ createdAt: -1 }).populate('askedBy answeredBy').populate({
+    const queryData = await Query.find().sort({ createdAt: -1 }).populate('askedBy', 'firstName lastName branch currentSemester').populate('answeredBy', 'firstName lastName').populate({
       path: 'askedBy',
       populate: [{
         path: 'branch',
@@ -44,6 +45,7 @@ router.get("/", async (req, res) => {
         select: '-_id name'
       }]
     });
+
     res.status(200).json(queryData);
   } catch (err) {
     console.error(err.message);
@@ -65,7 +67,7 @@ router.post("/:_id", idValidator, async (req, res) => {
       error: 'Answer is required'
     })
 
-    const queryData = await Query.findById(_id).populate('askedBy answeredBy').populate({
+    const queryData = await Query.findById(_id).populate('askedBy', 'firstName lastName branch currentSemester').populate('answeredBy', 'firstName lastName').populate({
       path: 'askedBy',
       populate: [{
         path: 'branch',
@@ -73,6 +75,7 @@ router.post("/:_id", idValidator, async (req, res) => {
         select: '-_id name'
       }]
     });
+
     if (!queryData) return res.status(404).json({
       error: 'Query not found'
     })
@@ -102,7 +105,7 @@ router.patch("/:_id", idValidator, async (req, res) => {
       error: 'Answer is required'
     });
 
-    const queryData = await Query.findById(_id).populate('askedBy answeredBy').populate({
+    const queryData = await Query.findById(_id).populate('askedBy', 'firstName lastName branch currentSemester').populate('answeredBy', 'firstName lastName').populate({
       path: 'askedBy',
       populate: [{
         path: 'branch',
@@ -110,6 +113,7 @@ router.patch("/:_id", idValidator, async (req, res) => {
         select: '-_id name'
       }]
     });
+
     if (!queryData) return res.status(404).json({
       error: 'Query not found'
     })
