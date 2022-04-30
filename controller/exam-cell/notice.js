@@ -18,7 +18,7 @@ router.post("/document", upload.single('file'), async (req, res) => {
     // Get extension of document
     const name = req.file.originalname.split(".");
     const ext = name.pop();
-    const fileName = name.join(".");
+    const fileName = encodeURI(name.join("."));
     const key = `${fileName}_${new Date().toJSON()}.${ext}`
     await s3.putObject({
       Body: req.file.buffer,

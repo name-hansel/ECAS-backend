@@ -235,3 +235,31 @@ exports.seatingArrangementValidator = [
     .bail(),
   sendErrors
 ]
+
+exports.courseValidator = [
+  body('code')
+    .notEmpty().withMessage('Course code is required')
+    .bail()
+    .isString().withMessage('Invalid course code'),
+  body('name')
+    .notEmpty().withMessage('Course name is required')
+    .bail()
+    .isString().withMessage('Invalid course name'),
+  body('semester')
+    .notEmpty().withMessage('Course semester is required')
+    .bail()
+    .isNumeric().withMessage('Invalid course semester'),
+  body('branch')
+    .notEmpty().withMessage('Branch is required')
+    .bail()
+    .custom(value => {
+      if (!isValidObjectId(value)) {
+        throw new Error("ID is not valid")
+      }
+      return true
+    }),
+  body('mandatory')
+    .optional()
+    .isBoolean().withMessage('Course mandatory status is invalid'),
+  sendErrors
+]

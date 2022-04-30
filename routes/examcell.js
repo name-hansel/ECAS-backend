@@ -9,6 +9,7 @@ const noticeRouter = require("../controller/exam-cell/notice");
 const faqRouter = require("../controller/exam-cell/faq");
 const seatingRouter = require("../controller/exam-cell/seating");
 const queryRouter = require("../controller/exam-cell/query");
+const courseRouter = require("../controller/exam-cell/course");
 
 router.use("/branch", examCellAuthMiddleware, branchRouter);
 router.use("/student", examCellAuthMiddleware, studentRouter);
@@ -17,5 +18,6 @@ router.use("/notice", examCellAuthMiddleware, noticeRouter);
 router.use("/faq", examCellAuthMiddleware, faqRouter);
 router.use("/seating", examCellAuthMiddleware, seatingRouter);
 router.use("/query", examCellAuthMiddleware, queryRouter);
+router.use("/course", examCellAuthMiddleware, courseRouter);
 
 module.exports = router;
