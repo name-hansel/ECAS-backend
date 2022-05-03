@@ -78,7 +78,7 @@ router.post("/", upload.fields([{
 
     // Create SA instance
     const newSeatingArrangement = new SeatingArrangement({
-      title, dateOfExam
+      title, dateOfExam, createdByEmail: req.user_email
     })
     await newSeatingArrangement.save();
 

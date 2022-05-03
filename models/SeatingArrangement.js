@@ -31,6 +31,10 @@ const SeatingArrangementSchema = new mongoose.Schema({
   }, solutionFile: {
     type: String,
     trim: true
+  }, createdByEmail: {
+    type: String,
+    trim: true,
+    required: true
   }
 }, { timestamps: true })
 
