@@ -13,7 +13,6 @@ const getPDF = async (data, questions, title) => {
   await page.setContent(resolvedTemplateAsStr);
   await page.emulateMediaType('screen');
   const pdf = await page.pdf({
-    path: 'paper.pdf',
     format: 'A4',
     printBackground: true
   })
