@@ -154,7 +154,7 @@ router.post("/dev/:role", async (req, res) => {
   try {
     const { email } = req.body;
     const { role } = req.params;
-    const user = role === "exam_cell" ? await ExamCell.findOne({ email }) : role === "student" ? await Student.findOne({ email, archived: false }).populate('branch') : null
+    const user = role === "exam_cell" ? await ExamCell.findOne({ email }) : role === "student" ? await Student.findOne({ email, archived: false }).populate('branch') : await Faculty.findOne({ email, archived: false })
 
     if (!user) return res.status(404).json({ message: "User not found" })
 

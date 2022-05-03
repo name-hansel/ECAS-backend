@@ -23,7 +23,7 @@ module.exports = async function initializeGA() {
     }
 
     // Create thread
-    const thread = new Worker("./genetic_algorithm/main.js", {
+    const thread = new Worker("./seating_genetic_algorithm/main.js", {
       workerData, env: SHARE_ENV
     })
 

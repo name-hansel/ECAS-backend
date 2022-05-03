@@ -86,6 +86,38 @@ const studentAuthMiddleware = (req, res, next) => {
   }
 }
 
+const facultyAuthMiddleware = (req, res, next) => {
+  try {
+    // Check cookie
+    if (!req.cookies['access-token'])
+      return res.status(401).json({
+        error: "Please log in"
+      })
+
+    const accessToken = req.cookies['access-token']
+
+    // Check if access token is valid
+    const { role, _id, email } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+
+    // Check if role is faculty
+    if (role !== "faculty") return res.status(403).send({ "error": "Please login as faculty" });
+
+    // Set year and branch in req object
+    req.role = role;
+    req.email = email;
+
+    // Save id of student
+    req._id = _id;
+
+    next();
+  } catch (err) {
+    console.error(err.message)
+    return res.status(500).json({
+      error: "Server error"
+    })
+  }
+}
+
 module.exports = {
-  adminAuthMiddleware, examCellAuthMiddleware, studentAuthMiddleware
+  adminAuthMiddleware, examCellAuthMiddleware, studentAuthMiddleware, facultyAuthMiddleware
 }

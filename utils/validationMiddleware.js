@@ -236,6 +236,39 @@ exports.seatingArrangementValidator = [
   sendErrors
 ]
 
+exports.quizValidator = [
+  body('title')
+    .notEmpty().withMessage('Title is required')
+    .bail()
+    .isString().withMessage('Invalid title'),
+  body('course')
+    .notEmpty().withMessage('Course is required')
+    .bail()
+    .custom(value => {
+      if (!isValidObjectId(value)) {
+        throw new Error("Course ID is not valid")
+      }
+      return true
+    }),
+  body('numberOfQuestionsInQuiz')
+    .notEmpty().withMessage('Number of questions in quiz is required')
+    .bail()
+    .isNumeric().withMessage('Invalid number of questions in quiz'),
+  body('rows')
+    .notEmpty().withMessage('Number of rows is required')
+    .bail()
+    .isNumeric().withMessage('Invalid number of rows'),
+  body('columns')
+    .notEmpty().withMessage('Number of columns is required')
+    .bail()
+    .isNumeric().withMessage('Invalid number of columns'),
+  body('numberOfStudents')
+    .notEmpty().withMessage('Number of students is required')
+    .bail()
+    .isNumeric().withMessage('Invalid number of students'),
+  sendErrors
+]
+
 exports.courseValidator = [
   body('code')
     .notEmpty().withMessage('Course code is required')

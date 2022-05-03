@@ -26,6 +26,7 @@ const commonAuthRouter = require("./routes/auth")
 const adminRouter = require("./routes/admin")
 const examCellRouter = require("./routes/examCell")
 const studentRouter = require("./routes/student")
+const facultyRouter = require("./routes/faculty")
 const publicRouter = require("./routes/public")
 
 // Routes
@@ -33,6 +34,7 @@ app.use("/api/auth", commonAuthRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/exam_cell", examCellRouter);
 app.use("/api/student", studentRouter);
+app.use("/api/faculty", facultyRouter);
 app.use("/api/public", publicRouter);
 
 app.listen(PORT, () => {

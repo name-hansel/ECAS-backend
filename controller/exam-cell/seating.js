@@ -116,7 +116,7 @@ router.post("/", upload.fields([{
       _id: newSeatingArrangement._id.toString(), studentFileName, courseFileName, roomFileName, lowerTitle, createdByEmail: req.user_email, title
     }
 
-    const thread = new Worker("./genetic_algorithm/main.js", {
+    const thread = new Worker("./seating_genetic_algorithm/main.js", {
       workerData, env: SHARE_ENV
     })
 
