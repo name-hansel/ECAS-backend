@@ -31,7 +31,13 @@ router.get("/:_id", idValidator, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const facultyData = await Faculty.find();
-    res.status(200).json(facultyData)
+    const sortedFacultyData = {
+      active: [],
+      archived: []
+    };
+    facultyData.forEach((faculty) => faculty.archived ? sortedFacultyData.archived.push(faculty) : sortedFacultyData.active.push(faculty))
+
+    res.status(200).json(sortedFacultyData)
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
