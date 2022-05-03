@@ -1,0 +1,51 @@
+<style>
+  .body {
+    margin: 56px 108px;
+    page-break-after: always;
+  }
+  .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .college {
+    margin-left: 24px;
+    font-size: 28px;
+  }
+  .details {
+    display: flex;
+    justify-content: space-between;
+  }
+  .title,
+  .details {
+    font-size: 16px;
+  }
+</style>
+
+<% for(let page = 0; page < rollQuestions.length ; page++) {%>
+  <% let ROLL_QUESTIONS = rollQuestions[page]; %> 
+  <div class="body">
+  <div class="header">
+  <img
+    width="50"
+    height="50"
+    src="https://storage.googleapis.com/ezap-prod/colleges/8538/pillai-college-of-engineering-navi-mumbai-logo.png"
+    alt="college logo"
+  />
+  <h1 class="college">Pillai College of Engineering (PCE)</h1>
+</div>
+
+<div class="details">
+  <h1 class="title">Test: <%= title %></h1>
+  <h1 class="details">Roll No.: <%= ROLL_QUESTIONS[0] %> </h1>
+</div>
+
+<div class="questions">
+  <% let questionNumber = 1; %>
+  <% for(let i=0;i<ROLL_QUESTIONS[1].length;i++){ %>  
+    <p><%= `Q${questionNumber++}. ${questions[--ROLL_QUESTIONS[1][i]]}` %></p>
+  <% } %> 
+</div>
+</div>
+<% } %>  

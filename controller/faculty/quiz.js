@@ -71,10 +71,23 @@ router.post("/", upload.fields([{
     newQuiz.questionsFile = questionsFileName;
 
     const workerData = {
-      _id: newQuiz._id.toString(), questionsFileName, createdByEmail: req.email, title
+      _id: newQuiz._id.toString(), questionsFileName, createdByEmail: req.email, title, lowerTitle,
+      rows, columns, numberOfStudents, numberOfQuestionsInQuiz
     }
 
     // Start GA
+    const thread = new Worker("./quiz_genetic_algorithm/main.js", {
+      workerData, env: SHARE_ENV
+    })
+
+    // Add thread to array
+    active_worker_threads.push(thread);
+
+    // Add threadId to quiz instance
+    newQuiz.threadId = thread.threadId;
+    await newQuiz.save();
+    await newQuiz.populate('course', 'code name');
+    await newQuiz.populate('faculty', 'firstName lastName');
 
     res.status(200).json(newQuiz);
   } catch (err) {
