@@ -34,6 +34,7 @@ router.get("/", (req, res) => {
       userData['year'] = user.year;
       userData['semester'] = user.semester;
       userData['division'] = user.division;
+      userData['branchName'] = user.branchName;
     }
 
     res.status(200).json(userData);
@@ -122,6 +123,7 @@ router.get("/google/:role", async (req, res) => {
       accessTokenData['year'] = Math.ceil(userData.currentSemester / 2);
       accessTokenData['semester'] = userData.currentSemester;
       accessTokenData['division'] = userData.currentDivision;
+      accessTokenData['branchName'] = userData.branch.name;
     }
 
     // Create a jwt with user id and role
@@ -174,6 +176,7 @@ router.post("/dev/:role", async (req, res) => {
     // Add currentYear and branch to accessTokenData if user is a student
     if (accessTokenData.role === "student") {
       accessTokenData['branch'] = user.branch._id;
+      accessTokenData['branchName'] = user.branch.name;
       // Get year from semester
       accessTokenData['year'] = Math.ceil(user.currentSemester / 2);
     }
