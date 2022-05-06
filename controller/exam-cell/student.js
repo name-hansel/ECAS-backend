@@ -9,6 +9,29 @@ const Student = require("../../models/Student");
 const Branch = require("../../models/Branch");
 const { studentValidator, studentsValidator, idValidator } = require("../../utils/validationMiddleware")
 
+// @route   GET /api/exam_cell/student/search
+// @desc    Get student by name
+// @access  Private
+router.get("/search", async (req, res) => {
+  try {
+    const searchString = req.query.searchString;
+    const searchResults = await Student.find({ $text: { $search: searchString } });
+
+    const sortedStudentData = {
+      active: [],
+      archived: []
+    };
+    searchResults.forEach((student) => student.archived ? sortedStudentData.archived.push(student) : sortedStudentData.active.push(student))
+
+    res.status(200).json(sortedStudentData)
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
 // @route   GET /api/exam_cell/student/csv
 // @desc    Parse .csv file and return array of student objects
 // @access  Private

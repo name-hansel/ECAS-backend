@@ -43,4 +43,5 @@ const StudentSchema = new mongoose.Schema({
   }
 }, { timestamps: true })
 
+StudentSchema.index({ firstName: 'text', lastName: 'text', middleName: 'text' })
 module.exports = mongoose.model("Student", StudentSchema)
