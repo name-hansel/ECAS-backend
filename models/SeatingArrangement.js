@@ -35,6 +35,9 @@ const SeatingArrangementSchema = new mongoose.Schema({
     type: String,
     trim: true,
     required: true
+  }, error: {
+    type: String,
+    trim: true
   }
 }, { timestamps: true })
 

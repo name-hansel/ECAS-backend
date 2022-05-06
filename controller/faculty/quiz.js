@@ -95,6 +95,8 @@ router.post("/", upload.fields([{
     newQuiz.threadId = thread.threadId;
     await newQuiz.save();
     await newQuiz.populate('course', 'code name semester');
+    newQuiz.semester = newQuiz.course.semester;
+    await newQuiz.save();
     await newQuiz.populate('faculty', 'firstName lastName');
 
     res.status(200).json(newQuiz);
@@ -218,11 +220,14 @@ router.delete("/:_id", idValidator, async (req, res) => {
     // Delete input files and solution file
     // Delete files from AWS S3
     const Objects = [];
-    [quizData.questionsFile, quizData.resultFile].forEach(file => {
+    Objects.push({
+      Key: quizData.questionsFile
+    })
+
+    if (quizData.resultFile)
       Objects.push({
-        Key: file
+        Key: quizData.resultFile
       })
-    });
 
     const params = {
       Bucket: process.env.QUIZ_BUCKET_NAME,

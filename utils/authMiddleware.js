@@ -65,7 +65,7 @@ const studentAuthMiddleware = (req, res, next) => {
     const accessToken = req.cookies['access-token']
 
     // Check if access token is valid
-    const { role, branch, year, _id } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
+    const { role, branch, year, _id, division, semester } = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
 
     // Check if role is exam cell
     if (role !== "student") return res.status(403).send({ "error": "Please login as student" });
@@ -73,6 +73,8 @@ const studentAuthMiddleware = (req, res, next) => {
     // Set year and branch in req object
     req.branch = branch;
     req.year = year;
+    req.division = division;
+    req.semester = semester;
 
     // Save id of student
     req._id = _id;

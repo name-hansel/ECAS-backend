@@ -53,6 +53,11 @@ const QuizSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
     default: false
+  }, semester: {
+    type: Number
+  }, error: {
+    type: String,
+    trim: true
   }
 }, { timestamps: true });
 
