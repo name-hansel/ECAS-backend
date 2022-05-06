@@ -266,6 +266,10 @@ exports.quizValidator = [
     .notEmpty().withMessage('Number of students is required')
     .bail()
     .isNumeric().withMessage('Invalid number of students'),
+  body('division')
+    .notEmpty().withMessage('Division is required')
+    .bail()
+    .isString().withMessage('Invalid division'),
   sendErrors
 ]
 

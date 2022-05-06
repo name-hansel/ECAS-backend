@@ -42,6 +42,17 @@ const QuizSchema = new mongoose.Schema({
   }, solutionFile: {
     type: String,
     trim: true
+  }, division: {
+    type: String,
+    required: true,
+    trim: true
+  }, resultFile: {
+    type: String,
+    trim: true
+  }, resultPublish: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 }, { timestamps: true });
 

@@ -24,7 +24,7 @@ const findThread = (threadId) => {
 // @access  Private
 router.get("/", async (req, res) => {
   try {
-    const quizData = await Quiz.find({ faculty: req._id }).populate('course', 'name code');
+    const quizData = await Quiz.find({ faculty: req._id }).populate('course', 'name code semester');
     res.status(200).json(quizData);
   } catch (err) {
     console.error(err.message);
@@ -34,7 +34,7 @@ router.get("/", async (req, res) => {
   }
 })
 
-// @route   POST /api/faculty
+// @route   POST /api/faculty/quiz
 // @desc    Add new quiz
 // @access  Private
 router.post("/", upload.fields([{
@@ -55,7 +55,7 @@ router.post("/", upload.fields([{
       error: 'Questions .csv file required'
     })
 
-    const { course, title, numberOfQuestionsInQuiz, rows, columns, numberOfStudents } = req.body;
+    const { course, title, numberOfQuestionsInQuiz, rows, columns, numberOfStudents, division } = req.body;
     const faculty = req._id;
 
     // Convert title to lowercase and URL encode to save in S3 bucket
@@ -64,7 +64,7 @@ router.post("/", upload.fields([{
 
     // Create quiz instance
     const newQuiz = new Quiz({
-      faculty, course, title, numberOfQuestionsInQuiz, rows, columns, numberOfStudents, questionsFile: questionsFileName
+      faculty, course, title, numberOfQuestionsInQuiz, rows, columns, numberOfStudents, questionsFile: questionsFileName, division
     })
     await newQuiz.save();
 
@@ -94,10 +94,94 @@ router.post("/", upload.fields([{
     // Add threadId to quiz instance
     newQuiz.threadId = thread.threadId;
     await newQuiz.save();
-    await newQuiz.populate('course', 'code name');
+    await newQuiz.populate('course', 'code name semester');
     await newQuiz.populate('faculty', 'firstName lastName');
 
     res.status(200).json(newQuiz);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
+// @route   POST /api/faculty/quiz/:_id/result
+// @desc    Add quiz result
+// @access  Private
+router.post("/:_id/result", idValidator, upload.fields([{
+  name: 'resultFile', maxCount: 1
+}]), async (req, res) => {
+  try {
+    // Check if result file is present
+    if (req.files['resultFile'] === undefined) return res.status(400).json({
+      error: 'Results .csv file required'
+    })
+
+    const { _id } = req.params;
+    const quizData = await Quiz.findById(_id);
+
+    if (!quizData) return res.status(404).json({ error: 'Quiz not found' });
+
+    // Upload file to AWS S3
+    const lowerTitle = encodeURI(quizData.title.toLowerCase());
+    const resultFileName = `${lowerTitle}_result.csv`
+
+    await s3.putObject({
+      Body: req.files['resultFile'][0].buffer,
+      Bucket: process.env.QUIZ_BUCKET_NAME,
+      Key: resultFileName
+    }).promise();
+
+    quizData.resultFile = resultFileName;
+    await quizData.save();
+    await quizData.populate('course', 'code name semester');
+    await quizData.populate('faculty', 'firstName lastName');
+    res.status(200).json(quizData);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
+// @route   PUT /api/faculty/quiz/:_id
+// @desc    Publish result
+// @access  Private
+router.put("/:_id", idValidator, async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const quizData = await Quiz.findById(_id).populate('course', 'name code semester');
+
+    if (!quizData) return res.status(404).json({ error: 'Quiz not found' });
+    if (quizData.resultPublish) return res.status(400).json({ error: 'Result has already been published.' });
+
+    quizData.resultPublish = true;
+    await quizData.save();
+    res.status(200).json(quizData);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({
+      error: "Server error",
+    });
+  }
+})
+
+// @route   DELETE /api/faculty/quiz/:_id/result
+// @desc    Delete quiz result
+// @access  Private
+router.delete("/:_id/result", idValidator, async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const quizData = await Quiz.findById(_id).populate('course', 'name code semester');
+    if (!quizData) return res.status(404).json({ error: 'Quiz not found' });
+
+    if (quizData.resultPublish) return res.status(400).json({ error: 'Result has already been published.' })
+
+    quizData.resultFile = null;
+    await quizData.save();
+    res.status(200).json(quizData);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -134,8 +218,7 @@ router.delete("/:_id", idValidator, async (req, res) => {
     // Delete input files and solution file
     // Delete files from AWS S3
     const Objects = [];
-    const lowerTitle = encodeURI(quizData.title.toLowerCase());
-    [quizData.questionsFile].forEach(file => {
+    [quizData.questionsFile, quizData.resultFile].forEach(file => {
       Objects.push({
         Key: file
       })

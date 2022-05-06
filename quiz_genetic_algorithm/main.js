@@ -96,7 +96,7 @@ const geneticAlgorithmStart = async () => {
     await mongoose.disconnect();
 
     // Send email to workerData.createdByEmail that seating arrangement has been generated
-    sendQuizEmail(workerData.createdByEmail, workerData.title, solutionFileName, true);
+    // sendQuizEmail(workerData.createdByEmail, workerData.title, solutionFileName, true);
 
     console.log(`Done with work in thread ${threadId}. Exiting...`);
   } catch (err) {
