@@ -1,6 +1,5 @@
 const { workerData, threadId } = require("worker_threads");
 const mongoose = require("mongoose");
-const Papa = require("papaparse");
 const nodemailer = require('nodemailer');
 
 const AWS = require("aws-sdk");
@@ -13,6 +12,7 @@ const SeatingArrangement = require("../models/SeatingArrangement");
 const getFiles = require("./utils/getFiles");
 const parseCSV = require("./utils/parseCSV");
 const geneticAlgorithm = require("./GA");
+const getPDF = require("./utils/getPDF");
 
 const sendSeatingArrangementMail = (email, title, solution, success) => {
   const transporter = nodemailer.createTransport({
@@ -59,20 +59,21 @@ const geneticAlgorithmStart = async () => {
     const { solution } = geneticAlgorithm(studentDetails, roomDetails, courseDetails);
     console.log(`Finished GA in thread ${threadId}`);
 
-    // Array to .csv file
-    solution.unshift(["ROOM_NUMBER", "ROW_NUMBER", "COLUMN_NUMBER", "STUDENT_DETAILS"]);
-    const csv = Papa.unparse(solution);
-    const solutionFileName = `${workerData.lowerTitle}_solution.csv`;
+    // Convert to PDF
+    const pdf = await getPDF(solution, studentDetails, roomDetails, courseDetails, workerData.title, workerData.dateOfExam);
+
+    const solutionFileName = `${workerData.lowerTitle}_solution.pdf`;
 
     // Upload solution to AWS
     await s3.putObject({
-      Body: csv,
+      Body: pdf,
       Bucket: process.env.SA_BUCKET_NAME,
       Key: solutionFileName
     }).promise();
 
     // Connect to database
     await connectToDatabase(threadId);
+
     // Update solution filename and close
     await SeatingArrangement.findByIdAndUpdate(workerData._id, {
       $set: {
@@ -93,6 +94,7 @@ const geneticAlgorithmStart = async () => {
     // Connect to database
     await connectToDatabase(threadId);
     console.error(err.message);
+    console.error(err)
     // Set fail to true
     await SeatingArrangement.findByIdAndUpdate(workerData._id, {
       $set: {

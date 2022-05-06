@@ -113,7 +113,7 @@ router.post("/", upload.fields([{
     newSeatingArrangement.roomFile = roomFileName;
 
     const workerData = {
-      _id: newSeatingArrangement._id.toString(), studentFileName, courseFileName, roomFileName, lowerTitle, createdByEmail: req.user_email, title
+      _id: newSeatingArrangement._id.toString(), studentFileName, courseFileName, roomFileName, lowerTitle, createdByEmail: req.user_email, title, dateOfExam
     }
 
     const thread = new Worker("./seating_genetic_algorithm/main.js", {
