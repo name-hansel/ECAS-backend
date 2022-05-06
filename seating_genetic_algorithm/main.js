@@ -93,13 +93,14 @@ const geneticAlgorithmStart = async () => {
   } catch (err) {
     // Connect to database
     await connectToDatabase(threadId);
-    console.error(err.message);
+
     console.error(err)
     // Set fail to true
     await SeatingArrangement.findByIdAndUpdate(workerData._id, {
       $set: {
         failed: true,
-        threadId: null
+        threadId: null,
+        error: err.message === 'number_of_students' ? 'Number of students are more than seats available' : err.message
       }
     })
     await mongoose.disconnect();

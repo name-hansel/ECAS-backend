@@ -64,6 +64,11 @@ const geneticAlgorithmStart = async () => {
     // Get number of questions in .csv file
     const totalNumberOfQuestions = questions.length;
 
+    // Total number of questions less than required questions
+    if (totalNumberOfQuestions < numberOfQuestionsInQuiz) throw new Error('number_of_questions');
+
+    if (numberOfStudents > rows * columns) throw new Error('number_of_students');
+
     // Do GA work here
     console.log(`Starting quiz GA in thread ${threadId}`);
 
@@ -102,17 +107,20 @@ const geneticAlgorithmStart = async () => {
   } catch (err) {
     // Connect to database
     await connectToDatabase(threadId);
+
     console.error(err)
+
     // Set fail to true
     await Quiz.findByIdAndUpdate(workerData._id, {
       $set: {
         failed: true,
-        threadId: null
+        threadId: null,
+        error: err.message === 'number_of_questions' ? 'Number of questions in question bank are less than number of questions required in quiz.' : err.message === 'number_of_students' ? 'Number of students are more than number of seats available' : err.message
       }
     })
     await mongoose.disconnect();
 
-    sendSeatingArrangementMail(workerData.createdByEmail, workerData.title, "", false);
+    sendQuizEmail(workerData.createdByEmail, workerData.title, "", false);
     process.exit(1);
   }
 }

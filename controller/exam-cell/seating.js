@@ -74,8 +74,6 @@ router.post("/", upload.fields([{
     // Convert title to lowercase and URL encode to save in S3 bucket
     const lowerTitle = encodeURI(title.toLowerCase());
 
-    // TODO Check if dateOfExam is in the past
-
     // Create SA instance
     const newSeatingArrangement = new SeatingArrangement({
       title, dateOfExam, createdByEmail: req.user_email

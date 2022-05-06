@@ -19,6 +19,9 @@ const geneticAlgorithm = (studentDetails, roomDetails, courseDetails) => {
   const numberOfStudents = studentDetails.length;
   // Get number of empty seats
   const emptySeats = numberOfSeats - numberOfStudents;
+
+  if (emptySeats < 0) throw new Error('number_of_students');
+
   const allotedSeats = [];
 
   // Generate initial population
