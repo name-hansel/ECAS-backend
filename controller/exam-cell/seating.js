@@ -184,7 +184,7 @@ router.delete("/:_id", idValidator, async (req, res) => {
     if (seatingArrangementData.complete) {
       await s3.deleteObject({
         Bucket: process.env.SA_BUCKET_NAME,
-        Key: `${lowerTitle}_solution.csv`
+        Key: `${lowerTitle}_solution.pdf`
       }).promise();
     }
     res.status(204).end();
